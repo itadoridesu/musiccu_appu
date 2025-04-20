@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/tiles/settings_tile.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
+import 'package:musiccu/features/personlization/controllers/theme_controller.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -15,6 +16,8 @@ class SettingsScreen extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(context);
 
     final controller = SongController.instance;
+
+    final themeController = Get.put(ThemeController(), permanent: true);
 
     return Scaffold(
       appBar: AAppBar(
@@ -36,9 +39,11 @@ class SettingsScreen extends StatelessWidget {
             SettingsTile(
               icon: Icons.brightness_6,
               text: 'Dark Mode',
-              trailingIcon: Switch(
-              value: dark,
-              onChanged: (value) {},
+              trailingIcon: Obx(
+                () => Switch(
+                  value: themeController.isDarkMode.value,
+                  onChanged: (value) => themeController.toggleTheme(),
+                ),
               ),
             ),
           ],

@@ -1,74 +1,91 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:iconsax/iconsax.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:musiccu/utils/constants/colors.dart';
+import 'package:musiccu/utils/helpers/helper_functions.dart'; // Assuming AColors is defined here
 
-// import '../constants/colors.dart';
-// import '../helpers/helper_functions.dart';
+class TLoaders {
+  static hideSnackBar() => ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
 
-// class TLoaders {
-//   static hideSnackBar() => ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
+  static customToast({required String message}) {
+    final dark = THelperFunctions.isDarkMode(Get.context!);
 
-//   static customToast({required message}) {
-//     ScaffoldMessenger.of(Get.context!).showSnackBar(
-//       SnackBar(
-//         elevation: 0,
-//         duration: const Duration(seconds: 3),
-//         backgroundColor: Colors.transparent,
-//         content: Container(
-//           padding: const EdgeInsets.all(12.0),
-//           margin: const EdgeInsets.symmetric(horizontal: 30),
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(30),
-//             color: THelperFunctions.isDarkMode(Get.context!) ? TColors.darkerGrey.withOpacity(0.9) : TColors.grey.withOpacity(0.9),
-//           ),
-//           child: Center(child: Text(message, style: Theme.of(Get.context!).textTheme.labelLarge)),
-//         ),
-//       ),
-//     );
-//   }
+    ScaffoldMessenger.of(Get.context!).showSnackBar(
+      SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.transparent,
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          margin: const EdgeInsets.symmetric(horizontal: 50),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: dark ? AColors.darkGray2 : AColors.artistTextColor,
+          ),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: dark ? AColors.songTitleColor : AColors.songTitleColorDark,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-//   static successSnackBar({required title, message = '', duration = 3}) {
-//     Get.snackbar(
-//       title,
-//       message,
-//       isDismissible: true,
-//       shouldIconPulse: true,
-//       colorText: Colors.white,
-//       backgroundColor: TColors.primary,
-//       snackPosition: SnackPosition.BOTTOM,
-//       duration: Duration(seconds: duration),
-//       margin: const EdgeInsets.all(10),
-//       icon: const Icon(Iconsax.check, color: TColors.white),
-//     );
-//   }
+  static successSnackBar({required String title, String message = '', int duration = 3}) {
+    final dark = THelperFunctions.isDarkMode(Get.context!);
 
-//   static warningSnackBar({required title, message = ''}) {
-//     Get.snackbar(
-//       title,
-//       message,
-//       isDismissible: true,
-//       shouldIconPulse: true,
-//       colorText: TColors.white,
-//       backgroundColor: Colors.orange,
-//       snackPosition: SnackPosition.BOTTOM,
-//       duration: const Duration(seconds: 3),
-//       margin: const EdgeInsets.all(20),
-//       icon: const Icon(Iconsax.warning_2, color: TColors.white),
-//     );
-//   }
+    Get.snackbar(
+      title,
+      message,
+      isDismissible: true,
+      snackPosition: SnackPosition.TOP,
+      duration: Duration(seconds: duration),
+      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      backgroundColor: dark ? AColors.dark : AColors.pageTitleColor,
+      colorText: dark ? AColors.songTitleColor : AColors.songTitleColorDark,
+      icon: Icon(Icons.check_circle, color: dark ? Colors.white : Colors.black, size: 20),
+      shouldIconPulse: false,
+    );
+  }
 
-//   static errorSnackBar({required title, message = ''}) {
-//     Get.snackbar(
-//       title,
-//       message,
-//       isDismissible: true,
-//       shouldIconPulse: true,
-//       colorText: TColors.white,
-//       backgroundColor: Colors.red.shade600,
-//       snackPosition: SnackPosition.BOTTOM,
-//       duration: const Duration(seconds: 3),
-//       margin: const EdgeInsets.all(20),
-//       icon: const Icon(Iconsax.warning_2, color: TColors.white),
-//     );
-//   }
-// }
+  static warningSnackBar({required String title, String message = ''}) {
+    final dark = THelperFunctions.isDarkMode(Get.context!);
+
+    Get.snackbar(
+      title,
+      message,
+      isDismissible: true,
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      backgroundColor: dark ? AColors.darkGray2 : AColors.artistTextColor,
+      colorText: dark ? AColors.songTitleColor : AColors.songTitleColorDark,
+      icon: Icon(Icons.warning_amber_rounded, color: dark ? Colors.white : Colors.black, size: 20),
+      shouldIconPulse: false,
+    );
+  }
+
+  static errorSnackBar({required String title, String message = ''}) {
+    final dark = THelperFunctions.isDarkMode(Get.context!);
+
+    Get.snackbar(
+      title,
+      message,
+      isDismissible: true,
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      backgroundColor: dark ? AColors.darkGray2 : AColors.artistTextColor,
+      colorText: dark ? AColors.songTitleColor : AColors.songTitleColorDark,
+      icon: Icon(Icons.error_outline, color: dark ? Colors.white : Colors.black, size: 20),
+      shouldIconPulse: false,
+    );
+  }
+}

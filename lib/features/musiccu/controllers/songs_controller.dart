@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:musiccu/data/repositories/songs_repository.dart';
 import 'package:musiccu/features/musiccu/models/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
+import 'package:musiccu/utils/popups/loader.dart';
+
 
 class SongController extends GetxController {
   static SongController get instance => Get.find();
@@ -9,8 +11,6 @@ class SongController extends GetxController {
   // Reactive state
   final RxList<SongModel> songs = <SongModel>[].obs;
   final RxBool isLoading = false.obs;
-  final RxString errorMessage = ''.obs;
-
   final Rx<SongModel?> selectedSong = Rx<SongModel?>(null); // Track the selected song
   final RxBool shouldNavigate = false.obs;
 
@@ -20,79 +20,84 @@ class SongController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-      print('🧠 CONTROLLER INIT TRIGGERED!');
-
-    loadSongsFromHive(); // Automatically load songs from Hive when the controller initializes
+    loadSongsFromHive(); 
     _handleNavigation();
   }
 
   Future<void> loadSongsFromHive() async {
     try {
       isLoading.value = true;
-      errorMessage.value = '';
-
-      // Debug: Print when songs are loading from Hive
-      print('📥 COMING FROM SongController - Loading songs from Hive...'); 
 
       final fetchedSongs = await _songRepository.getSongsFromHive();
 
-      // Debug: Print fetched songs
-      print('🎶 COMING FROM SongController - Fetched songs: $fetchedSongs'); 
-
       songs.assignAll(fetchedSongs); 
 
-      // Debug: Print the updated songs list
-      print('🔥 UI SHOULD UPDATE NOW WITH ${songs.length} SONGS');
-
+      TLoaders.successSnackBar(
+        title: 'Songs Loaded',
+        message: 'Your songs were loaded successfully',
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load songs: ${e.toString()}';
-    } finally {
-      isLoading.value = false;
-    }
+      isLoading.value = false; 
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: e.toString(),
+      );
+    } 
   }
 
-  Future<void> deleteAll() async {
-    await _songRepository.clearAllSongsFromHive(); // Clear all songs from Hive
-    songs.value = await _songRepository.getSongsFromHive();
-  }
+  // Future<void> deleteAll() async {
+  //   try {
+
+  //     await _songRepository.clearAllSongsFromHive(); // Clear all songs from Hive
+  //     songs.value = await _songRepository.getSongsFromHive();
+
+  //     // On success, show success snack bar
+  //     TLoaders.successSnackBar(
+  //       title: 'Songs Cleared',
+  //       message: 'All songs have been cleared successfully.',
+  //     );
+  //   } catch (e) {
+
+  //     TLoaders.errorSnackBar(
+  //       title: 'Error',
+  //       message: e.toString(),
+  //     );
+  //   } 
+  // }
 
   Future<void> importSongsFromFile() async {
     try {
       isLoading.value = true;
-      errorMessage.value = '';
-
-      // Debug: Print when importing songs from file
-      print('📂 COMING FROM SongController - Importing songs from file...');
 
       // Fetch songs from file picker and save to Hive
       await _songRepository.pickAndSaveSongs(); // Picks + saves
 
-      // Debug: Print confirmation of songs being saved
-      print('🎵 COMING FROM SongController - Songs imported and saved to Hive');
+      songs.value = await _songRepository.getSongsFromHive(); // Fetch updated songs from Hive
 
-      await loadSongsFromHive(); // Refresh the local list from Hive
+      TLoaders.successSnackBar(
+        title: 'Songs Imported',
+        message: 'Your songs were imported successfully desu',
+      );
+
     } catch (e) {
-      errorMessage.value = 'Failed to import songs: ${e.toString()}';
-    } finally {
-      isLoading.value = false;
+      isLoading.value = false; 
+
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: e.toString(),
+      );
     }
   }
 
   void updateSelectedSong(SongModel song, {bool navigate = false}) {
     selectedSong.value = song;
     shouldNavigate.value = navigate; // <- flag to trigger nav
-
-    // Debug: Print selected song and navigation flag
-    print('🎧 COMING FROM SongController - Selected song: ${song.songName}, navigate: $navigate');
   }
 
   void _handleNavigation() {
     ever(shouldNavigate, (bool shouldNav) {
       if (shouldNav && selectedSong.value != null) {
         shouldNavigate.value = false; // Reset the trigger
-
-        // Debug: Print when navigation is triggered
-        print('🛸 COMING FROM SongController - Navigating to NowPlaying screen for song: ${selectedSong.value!.songName}');
 
         // Navigate to the NowPlaying screen
         Get.to(

@@ -11,8 +11,13 @@ void main() async {
 
   Hive.registerAdapter(SongModelAdapter());
 
-  // Open Hive boxes  (add the boxes you need here)
-  await Hive.openBox<SongModel>('songsBox'); // Ensure it's typed correctly with SongModel
+
+  // Open all boxes upfront
+  await Future.wait([
+    Hive.openBox<SongModel>('songsBox'),
+    Hive.openBox('theme_preferences'), 
+  ]);
+
   
   runApp(const MyApp());
 }

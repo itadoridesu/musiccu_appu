@@ -12,22 +12,14 @@ class SongRepository extends GetxController {
   // Store the box reference to avoid opening it multiple times
   Box<SongModel>? _songsBox;
 
-  // Ensure the box is opened only once
-  Future<Box<SongModel>> _getSongsBox() async {
-    if (_songsBox == null) {
-      _songsBox = await Hive.openBox<SongModel>(_songsBoxName);
-    }
-    return _songsBox!;
-  }
 
   // Clears all songs from Hive
   Future<void> clearAllSongsFromHive() async {
     try {
-      final box = await _getSongsBox();
-      await box.clear(); // Clears all entries in the box
-      print('🧹 All songs have been cleared from Hive.');
+      final box = await Hive.box(_songsBoxName);
+      await box.clear();
     } catch (e) {
-      print('🔥 Error clearing songs from Hive: ${e.toString()}');
+      throw 'Something went wrong while clearing your songs. Please try again.';
     }
   }
 
@@ -36,8 +28,8 @@ class SongRepository extends GetxController {
     try {
       // Step 1: Picking files
       final result = await _pickAudioFiles();
-      if (result == null) throw 'User cancelled file selection';
-      if (result.files.isEmpty) throw 'No audio files selected';
+      if (result == null) throw 'You cancelled the file selection.';
+      if (result.files.isEmpty) throw 'No audio files were selected. Please choose at least one file.';
 
       // Step 2: Processing files
       final songs = await _processAudioFiles(result.files);
@@ -45,13 +37,13 @@ class SongRepository extends GetxController {
       // Step 3: Saving to Hive
       await _saveSongsToHive(songs);
     } catch (e) {
-      throw 'Failed to pick and save songs: ${e.toString()}';
+      throw 'There was an error. Please try again.';
     }
   }
 
   Future<void> _saveSongsToHive(List<SongModel> newSongs) async {
     try {
-      final box = await _getSongsBox();
+      final box = Hive.box<SongModel>(_songsBoxName);
 
       // Fetch existing songs' audio URLs in the box
       final existingSongs = box.values.toList();
@@ -72,18 +64,17 @@ class SongRepository extends GetxController {
         await box.addAll(uniqueSongs);
       }
     } catch (e) {
-      print('🔥 ERROR inside _saveSongsToHive: $e');
+      throw 'There was an error while saving your songs. Please try again.';
     }
   }
 
   // Public: fetch saved songs from Hive
   Future<List<SongModel>> getSongsFromHive() async {
     try {
-      final box = await _getSongsBox();
+      final box = Hive.box<SongModel>(_songsBoxName);
       return box.values.toList();
     } catch (e) {
-      print('Error fetching songs: ${e.toString()}');
-      throw 'Failed to load songs from Hive';
+      throw 'Failed to load songs. Please check your storage and try again.';
     }
   }
 
