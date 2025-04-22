@@ -5,6 +5,7 @@ import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/glassmorhphism/glass_effect_container.dart';
 import 'package:musiccu/common/widgets/tiles/song_tile.dart';
 import 'package:musiccu/features/musiccu/controllers/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/image_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/songs/widgets/all_songs_container.dart';
 import 'package:musiccu/features/personlization/screens/settings_screen.dart';
@@ -15,12 +16,12 @@ class SongsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    final imageController = Get.put(ImageController());
+
+
     final controller = Get.put(SongController());
 
     final audioController = Get.put(AudioController());
-
-    print('🔄 BUILDING WIDGET WITH ${controller.songs.length} SONGS');
-
 
     return Scaffold(
       appBar: AAppBar(

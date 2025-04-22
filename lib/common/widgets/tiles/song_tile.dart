@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
 import 'package:musiccu/common/widgets/icons/pause_stop.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/common/widgets/texts/song_artist.dart';
+import 'package:musiccu/features/musiccu/controllers/image_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
 
@@ -36,6 +39,7 @@ class SongTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap
@@ -74,7 +78,7 @@ class SongTile extends StatelessWidget {
                 if (showIcon) ContainerIcon(icon1: icon1, height: 50, width: 50, onTap: () {}, color: Colors.transparent),
       
                 // Icon 2 (Three Dots Icon) if showIcon is true
-                if (showIcon) icon2,
+                if (showIcon) GestureDetector(onTap: () => SongController.instance.showSongMenu(song, context), child: icon2),
       
                 // Pause icon with white container and black icon in dark mode, vice versa in light mode
                 if (isPauseStop) Hero(

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:musiccu/features/personlization/controllers/theme_controller.dart';
 import 'package:musiccu/utils/constants/colors.dart';
-import 'package:musiccu/utils/helpers/helper_functions.dart'; // Assuming AColors is defined here
 
 class TLoaders {
   static hideSnackBar() => ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
 
   static customToast({required String message}) {
-    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final dark = ThemeController.instance.isDarkMode.value;
 
     ScaffoldMessenger.of(Get.context!).showSnackBar(
       SnackBar(
@@ -36,7 +36,7 @@ class TLoaders {
   }
 
   static successSnackBar({required String title, String message = '', int duration = 3}) {
-    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final dark = ThemeController.instance.isDarkMode();
 
     Get.snackbar(
       title,
@@ -54,7 +54,7 @@ class TLoaders {
   }
 
   static warningSnackBar({required String title, String message = ''}) {
-    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final dark = ThemeController.instance.isDarkMode.value;
 
     Get.snackbar(
       title,
@@ -72,7 +72,7 @@ class TLoaders {
   }
 
   static errorSnackBar({required String title, String message = ''}) {
-    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final dark = ThemeController.instance.isDarkMode.value;
 
     Get.snackbar(
       title,
@@ -89,3 +89,4 @@ class TLoaders {
     );
   }
 }
+

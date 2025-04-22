@@ -33,12 +33,14 @@ class SongHorizontal extends StatelessWidget {
                 height: 110,
                 width: 110,
                 applyImageRadius: true,
+                borderRadius: 110,
+                rotate: true,
               ),
             ),
 
             const SizedBox(width: 13),
 
-            Padding(padding: EdgeInsets.only(top: 7), child: SongArtistText(song: song, showIcon: showIcon)),
+            Padding(padding: EdgeInsets.only(top: 7), child: SongArtistText(song: song, showIcon: showIcon, maxWidth: 0.47,)),
           ], 
         ),
 

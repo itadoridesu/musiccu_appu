@@ -35,7 +35,7 @@ class SongVerticaled extends StatelessWidget {
         const SizedBox(height: 9),
         Padding(
           padding: const EdgeInsets.only(left: 16),
-          child: SongArtistText(song: song, showIcon: showIcon),
+          child: SongArtistText(song: song, showIcon: showIcon, maxWidth: 0.7, moving: false,),
         ),
       ],
     );

@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ThemeController()); // Initialize controller
+    Get.put(ThemeController(), permanent: true); 
     
     return Obx(() => GetMaterialApp(
       debugShowCheckedModeBanner: false,

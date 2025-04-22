@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -96,6 +98,13 @@ class THelperFunctions {
   // static String getFormattedDate(DateTime date, {String format = 'dd MMM yyyy'}) {
   //   return DateFormat(format).format(date);
   // }
+
+  static String formatFileSize(int bytes) {
+  if (bytes <= 0) return "0 B";
+  const suffixes = ["B", "KB", "MB", "GB"];
+  final i = (log(bytes) / log(1024)).floor();
+  return '${(bytes / pow(1024, i)).toStringAsFixed(i == 0 ? 0 : 1)} ${suffixes[i]}';
+}
 
   static List<T> removeDuplicates<T>(List<T> list) {
     return list.toSet().toList();

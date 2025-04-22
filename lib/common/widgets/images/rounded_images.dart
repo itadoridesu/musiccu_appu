@@ -1,6 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:musiccu/features/musiccu/controllers/image_controller.dart';
 
 class RoundedImage extends StatelessWidget {
   const RoundedImage({
@@ -16,11 +17,12 @@ class RoundedImage extends StatelessWidget {
     this.onPressed,
     this.borderRadius = 25,
     this.showShadow = false,
-    this.shadow = const BoxShadow(  
+    this.shadow = const BoxShadow(
       color: Colors.black26,
       blurRadius: 10.0,
       offset: Offset(0, 4),
     ),
+    this.rotate = false,
   });
 
   final double? width, height;
@@ -32,15 +34,22 @@ class RoundedImage extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onPressed;
   final double borderRadius;
-  final bool showShadow; 
-  final BoxShadow shadow; 
+  final bool showShadow;
+  final BoxShadow shadow;
+  final bool rotate;
 
   @override
   Widget build(BuildContext context) {
-    // Check if imageUrl is a valid path and exists on the device
-    String imageToShow = imageUrl.isNotEmpty && File(imageUrl).existsSync()
+    final imageController = ImageController.instance;
+    imageController.handleRotation(rotate);
+    
+    final imageToShow = imageUrl.isNotEmpty && File(imageUrl).existsSync()
         ? imageUrl
-        : 'assets/no_music.png'; // fallback to default image if not valid
+        : 'assets/no_music.png';
+
+    final imageContent = File(imageToShow).existsSync()
+        ? Image.file(File(imageToShow), fit: fit)
+        : Image.asset(imageToShow, fit: fit);
 
     return GestureDetector(
       onTap: onPressed,
@@ -52,21 +61,18 @@ class RoundedImage extends StatelessWidget {
           border: border,
           color: backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: showShadow ? [shadow] : [], 
+          boxShadow: showShadow ? [shadow] : [],
         ),
         child: ClipRRect(
           borderRadius: applyImageRadius
               ? BorderRadius.circular(borderRadius)
               : BorderRadius.zero,
-          child: File(imageToShow).existsSync()
-              ? Image.file(
-                  File(imageToShow),
-                  fit: fit,
-                )
-              : Image.asset(
-                  imageToShow,
-                  fit: fit,
-                ),
+          child: rotate 
+              ? Obx(() => Transform.rotate(
+                    angle: imageController.currentAngle.value,
+                    child: imageContent,
+                  ))
+              : imageContent,
         ),
       ),
     );

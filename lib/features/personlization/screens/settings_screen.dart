@@ -5,7 +5,6 @@ import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/tiles/settings_tile.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/personlization/controllers/theme_controller.dart';
-import 'package:musiccu/utils/helpers/helper_functions.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -13,11 +12,10 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final dark = THelperFunctions.isDarkMode(context);
 
     final controller = SongController.instance;
 
-    final themeController = Get.put(ThemeController(), permanent: true);
+    final themeController = ThemeController.instance;
 
     return Scaffold(
       appBar: AAppBar(

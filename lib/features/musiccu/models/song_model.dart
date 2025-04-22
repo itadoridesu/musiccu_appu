@@ -44,6 +44,9 @@ class SongModel {
     required this.currentPosition,
   });
 
+
+
+
   // Convert SongModel to JSON
   Map<String, dynamic> toJson() {
     return {
@@ -105,6 +108,16 @@ class SongModel {
     currentPosition: 0, // Default current position to 0
   );
 
+
+
+  
+  static Future<int> getId() async {
+    var box = await Hive.openBox<int>('idCounterBox');
+    int nextId = box.get('currentId', defaultValue: 0)!;
+    await box.put('currentId', nextId + 1);
+    return nextId;
+  }
+
   // Save album art image to file system
   static Future<String> saveAlbumArt(Uint8List albumArt, String baseName) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -127,8 +140,10 @@ class SongModel {
       imagePath = await SongModel.saveAlbumArt(metadata.albumArt as Uint8List, baseName);
     }
 
+    final id = await getId();
+
     return SongModel(
-      id: filePath.hashCode.toString(),
+      id: id.toString(), // Generate a unique ID
       imagePath: imagePath, // Only the actual file path or empty string
       songName: metadata.trackName ?? baseName,
       artistName: metadata.trackArtistNames?.join(', ') ?? 'Unknown Artist',
