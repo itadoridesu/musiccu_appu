@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/tiles/settings_tile.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
+import 'package:musiccu/features/musiccu/screens/playlists/playlists_screen.dart';
 import 'package:musiccu/features/personlization/controllers/theme_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -16,6 +17,8 @@ class SettingsScreen extends StatelessWidget {
     final controller = SongController.instance;
 
     final themeController = ThemeController.instance;
+
+    
 
     return Scaffold(
       appBar: AAppBar(
@@ -43,6 +46,11 @@ class SettingsScreen extends StatelessWidget {
                   onChanged: (value) => themeController.toggleTheme(),
                 ),
               ),
+            ), 
+            SettingsTile(
+              icon: Icons.playlist_add,
+              text: 'Add Playlist',
+              onPressed: () => Get.to(() => PlaylistsScreen()),
             ),
           ],
         ),

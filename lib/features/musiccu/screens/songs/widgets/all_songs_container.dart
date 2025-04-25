@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
-import 'package:musiccu/features/musiccu/models/song_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/common/widgets/tiles/song_tile.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';

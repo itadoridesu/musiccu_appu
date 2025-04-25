@@ -12,6 +12,8 @@ class LyricsContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
 
+    print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" + lyrics);
+
     return Hero(
       tag: "Up - Next", // Hero transition tag
       child: Container(

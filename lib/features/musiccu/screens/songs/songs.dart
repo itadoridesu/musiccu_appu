@@ -21,7 +21,7 @@ class SongsScreen extends StatelessWidget {
 
     final controller = Get.put(SongController());
 
-    final audioController = Get.put(AudioController());
+    Get.put(AudioController());
 
     return Scaffold(
       appBar: AAppBar(

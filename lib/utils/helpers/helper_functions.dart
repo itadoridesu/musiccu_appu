@@ -99,12 +99,19 @@ class THelperFunctions {
   //   return DateFormat(format).format(date);
   // }
 
-  static String formatFileSize(int bytes) {
+// file size formatter
+static String formatFileSize(int bytes) {
   if (bytes <= 0) return "0 B";
   const suffixes = ["B", "KB", "MB", "GB"];
   final i = (log(bytes) / log(1024)).floor();
   return '${(bytes / pow(1024, i)).toStringAsFixed(i == 0 ? 0 : 1)} ${suffixes[i]}';
 }
+
+/// Format a duration to a string in the format mm:ss
+static String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    return '${twoDigits(duration.inMinutes)}:${twoDigits(duration.inSeconds.remainder(60))}';
+  }
 
   static List<T> removeDuplicates<T>(List<T> list) {
     return list.toSet().toList();

@@ -4,7 +4,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/common/widgets/texts/song_artist.dart';
-import 'package:musiccu/features/musiccu/models/song_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 
@@ -16,7 +16,6 @@ class SongHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final dark = THelperFunctions.isDarkMode(context);
 
     return Row(
@@ -40,11 +39,29 @@ class SongHorizontal extends StatelessWidget {
 
             const SizedBox(width: 13),
 
-            Padding(padding: EdgeInsets.only(top: 7), child: SongArtistText(song: song, showIcon: showIcon, maxWidth: 0.47,)),
-          ], 
+            Padding(
+              padding: EdgeInsets.only(top: 7),
+              child: SongArtistText(
+                song: song,
+                showIcon: showIcon,
+                maxWidth: 0.47,
+              ),
+            ),
+          ],
         ),
 
-        Hero(tag: "lyrics button" ,child: ContainerIcon(icon1: Icon(CupertinoIcons.music_note_2, color: dark ?AColors.inverseDarkGrey : AColors.textPrimary,), height: 50, width: 50, onTap: () => Get.back())),
+        Hero(
+          tag: "lyrics button",
+          child: ContainerIcon(
+            icon1: Icon(
+              CupertinoIcons.music_note_2,
+              color: dark ? AColors.inverseDarkGrey : AColors.textPrimary,
+            ),
+            height: 50,
+            width: 50,
+            onTap: () => Get.back(),
+          ),
+        ),
       ],
     );
   }

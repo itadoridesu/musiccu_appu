@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/common/widgets/texts/song_artist.dart';
-import 'package:musiccu/features/musiccu/models/song_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 
 class SongVerticaled extends StatelessWidget {
   const SongVerticaled({

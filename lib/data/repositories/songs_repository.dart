@@ -3,13 +3,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:musiccu/features/musiccu/models/song_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 
 class SongRepository extends GetxController {
   static SongRepository get instance => Get.find();
   static const String _songsBoxName = 'songsBox';
-
-  Box<SongModel>? _songsBox;
 
   // Clears all songs from Hive
   // Future<void> clearAllSongsFromHive() async {
@@ -27,8 +25,7 @@ class SongRepository extends GetxController {
       // Step 1: Picking files
       final result = await _pickAudioFiles();
       if (result == null) throw 'You cancelled the file selection.';
-      if (result.files.isEmpty)
-        throw 'No audio files were selected. Please choose at least one file.';
+      if (result.files.isEmpty) throw 'No audio files were selected. Please choose at least one file.';
 
       // Step 2: Processing files
       final songs = await _processAudioFiles(result.files);
@@ -77,6 +74,23 @@ class SongRepository extends GetxController {
   }
 
   /// Update single song fields
+  Future<void> updateSong(SongModel song) async {
+    try {
+      final box = Hive.box<SongModel>(_songsBoxName);
+      final key = box.keys.firstWhere(
+        (k) => box.get(k)?.id == song.id,
+        orElse: () => null,
+      );
+
+      if (key != null) {
+        await box.put(key, song);
+      } else {
+        throw 'Song not found.';
+      }
+    } catch (e) {
+      throw 'Failed to update the song. Please try again.';
+    }
+  }
 
   /// Delete song
   Future<void> deleteSong(String id) async {

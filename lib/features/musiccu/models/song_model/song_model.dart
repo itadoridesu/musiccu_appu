@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dart_tags/dart_tags.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,20 +11,19 @@ part 'song_model.g.dart';
 @HiveType(typeId: 0) // Assign a unique ID to this model type
 class SongModel {
   @HiveField(0) final String id;
-  @HiveField(1) final String imagePath;
-  @HiveField(2) final String songName;
-  @HiveField(3) final String artistName;
-  @HiveField(4) final String albumName;
+  @HiveField(1) String imagePath;
+  @HiveField(2) String songName;
+  @HiveField(3) String artistName;
+  @HiveField(4) String albumName;
   @HiveField(5) final String audioUrl;
   @HiveField(6) final int duration; // Duration in seconds
-  @HiveField(7) final String genre;
-  @HiveField(8) final String lyrics;
-  @HiveField(9) final int playCount;
-  @HiveField(10) final bool isFavorite;
+  @HiveField(7) String genre;
+  @HiveField(8) String lyrics;
+  @HiveField(9) int playCount;
+  @HiveField(10) bool isFavorite;
   @HiveField(11) final int fileSize; // in bytes
   @HiveField(12) final DateTime createdAt;
-  @HiveField(13) final DateTime updatedAt;
-  @HiveField(14) final int currentPosition; // Current playback position in seconds
+  @HiveField(13) DateTime updatedAt;
 
   // Constructor
   SongModel({
@@ -41,7 +41,6 @@ class SongModel {
     required this.fileSize,
     required this.createdAt,
     required this.updatedAt,
-    required this.currentPosition,
   });
 
 
@@ -64,7 +63,6 @@ class SongModel {
       'fileSize': fileSize,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      'currentPosition': currentPosition, // Store current position
     };
   }
 
@@ -85,7 +83,6 @@ class SongModel {
       fileSize: json['fileSize'] ?? 0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
-      currentPosition: json['currentPosition'] ?? 0,
     );
   }
 
@@ -105,7 +102,6 @@ class SongModel {
     fileSize: 0,
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
-    currentPosition: 0, // Default current position to 0
   );
 
 
@@ -117,6 +113,36 @@ class SongModel {
     await box.put('currentId', nextId + 1);
     return nextId;
   }
+
+     // 2. Extract lyrics using dart_tags (for MP3/ID3)
+
+static Future<String> extractLyricsWithDartTags(File file) async {
+  try {
+    final tagProcessor = TagProcessor();
+    final List<int> bytes = await file.readAsBytes(); // explicitly List<int>
+
+    final tags = await tagProcessor.getTagsFromByteArray(Future.value(bytes)); 
+
+    for (var tag in tags) {
+      final tagMap = tag.tags;
+
+      for (var entry in tagMap.entries) {
+        final key = entry.key.toLowerCase();
+        final value = entry.value.toString();
+
+        if (key.contains('lyrics') || key.contains('unsynchronized lyrics') || key.contains('uslt')) {
+          print('🎵 Found lyrics: $value');
+          return value;
+        }
+      }
+    }
+
+    return 'No lyrics available';
+  } catch (e) {
+    print('❌ Error while extracting lyrics: $e');
+    return 'Could not load lyrics';
+  }
+}
 
   // Save album art image to file system
   static Future<String> saveAlbumArt(Uint8List albumArt, String baseName) async {
@@ -140,6 +166,11 @@ class SongModel {
       imagePath = await SongModel.saveAlbumArt(metadata.albumArt as Uint8List, baseName);
     }
 
+
+
+
+    String lyrics = await extractLyricsWithDartTags(file);
+
     final id = await getId();
 
     return SongModel(
@@ -151,33 +182,14 @@ class SongModel {
       audioUrl: filePath,
       duration: metadata.trackDuration ?? 0, // Store as seconds
       genre: metadata.genre ?? '',
-      lyrics: "", // Assuming no lyrics for now
+      lyrics: "I am so tired bro offffff hhhhh", 
       playCount: 0,
       isFavorite: false,
       fileSize: file.lengthSync(),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      currentPosition: 0, // Initialize current position to 0
     );
   }
 
   /// Default Dummy Helper Function
-  static SongModel defaultSong(String id, String songName, String artistName) =>
-      SongModel(
-        id: id,
-        imagePath: 'assets/griffith.jpg',
-        songName: songName,
-        artistName: artistName,
-        albumName: 'Default Album',
-        audioUrl: 'https://example.com/audio.mp3',
-        duration: 225, // Example: 3 minutes 45 seconds
-        genre: 'Epic',
-        lyrics: 'Lorem ipsum dolor sit amet...',
-        playCount: 0,
-        isFavorite: false,
-        fileSize: 4300800, // example: ~4.1 MB
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        currentPosition: 0, // Default current position
-      );
 }

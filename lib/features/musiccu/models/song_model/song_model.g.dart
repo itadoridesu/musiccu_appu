@@ -31,14 +31,13 @@ class SongModelAdapter extends TypeAdapter<SongModel> {
       fileSize: fields[11] as int,
       createdAt: fields[12] as DateTime,
       updatedAt: fields[13] as DateTime,
-      currentPosition: fields[14] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, SongModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -66,9 +65,7 @@ class SongModelAdapter extends TypeAdapter<SongModel> {
       ..writeByte(12)
       ..write(obj.createdAt)
       ..writeByte(13)
-      ..write(obj.updatedAt)
-      ..writeByte(14)
-      ..write(obj.currentPosition);
+      ..write(obj.updatedAt);
   }
 
   @override

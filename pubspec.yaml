@@ -61,6 +61,8 @@ dependencies:
   flutter_media_metadata: ^1.0.0+1 # Metadata extraction (title/artist/album)
   media_store_plus: ^0.1.3
   file_picker: ^10.1.2 # File picker for selecting local files
+  dart_tags: ^0.4.1
+
 
 
  

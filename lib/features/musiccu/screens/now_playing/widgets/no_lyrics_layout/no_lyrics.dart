@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:musiccu/features/musiccu/models/song_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/widgets/no_lyrics_layout/music_bar.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/widgets/no_lyrics_layout/song_heart_icons.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/widgets/no_lyrics_layout/song_vertical.dart';
