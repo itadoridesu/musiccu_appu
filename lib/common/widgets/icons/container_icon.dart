@@ -7,29 +7,41 @@ class ContainerIcon extends StatelessWidget {
     super.key,
     required this.icon1,
     this.color,
-    required this.height,
+    required this.height, 
     required this.width,
     required this.onTap,
+    this.radius = 50,
   });
 
   final Icon icon1;
   final Color? color;
-  final double height, width;
-  final VoidCallback onTap;
+  final double height, width, radius;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          color: color ?? (dark ? AColors.darkContainer : AColors.inverseDarkGrey),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(radius),
+      clipBehavior: Clip.antiAlias, // required for ripple to clip to radius
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            color: color ?? (dark ? AColors.darkContainer : AColors.inverseDarkGrey),
+          ),
+          child: Center(
+            child: Icon(
+              icon1.icon,
+              color: icon1.color,
+              size: icon1.size,
+            ),
+          ),
         ),
-        child: Center(child: icon1),
       ),
     );
   }

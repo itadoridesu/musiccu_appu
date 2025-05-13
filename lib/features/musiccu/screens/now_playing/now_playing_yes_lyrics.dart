@@ -8,9 +8,8 @@ import 'package:musiccu/features/musiccu/screens/now_playing/widgets/yes_lyrics_
 import 'package:musiccu/features/musiccu/screens/songs/songs.dart';
 
 class NowPlayingYesLyrics extends StatelessWidget {
-  const NowPlayingYesLyrics({super.key, required this.song, required this.showIcon});
+  const NowPlayingYesLyrics({super.key, required this.showIcon});
 
-  final SongModel song;
   final bool showIcon;
 
   @override
@@ -22,24 +21,22 @@ class NowPlayingYesLyrics extends StatelessWidget {
         icon1: Icons.keyboard_arrow_down,
         icon2: Icons.graphic_eq,
         title: "Now Playing",
-        onTapL: () => Get.to(() => const SongsScreen(), duration: const Duration(milliseconds: 1000), transition: Transition.fadeIn),
+        onTapL: () {
+          Get.back();
+          Future.delayed(Duration(milliseconds: 700));
+          Get.back();
+          
+        }
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(right: 24, left: 24, top: 8, bottom: 8),
-        child: YesLyricsLayout(song: song, showIcon: showIcon),
+        child: YesLyricsLayout(showIcon: showIcon),
       ),
 
       bottomNavigationBar:  Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
         child: MusicControlRow(),
       ),
     );
   }
 }
-
-
-
-
-
-
-

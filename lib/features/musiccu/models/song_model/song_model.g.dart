@@ -27,17 +27,16 @@ class SongModelAdapter extends TypeAdapter<SongModel> {
       genre: fields[7] as String,
       lyrics: fields[8] as String,
       playCount: fields[9] as int,
-      isFavorite: fields[10] as bool,
-      fileSize: fields[11] as int,
-      createdAt: fields[12] as DateTime,
-      updatedAt: fields[13] as DateTime,
+      fileSize: fields[10] as int,
+      createdAt: fields[11] as DateTime,
+      updatedAt: fields[12] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, SongModel obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,12 +58,10 @@ class SongModelAdapter extends TypeAdapter<SongModel> {
       ..writeByte(9)
       ..write(obj.playCount)
       ..writeByte(10)
-      ..write(obj.isFavorite)
-      ..writeByte(11)
       ..write(obj.fileSize)
-      ..writeByte(12)
+      ..writeByte(11)
       ..write(obj.createdAt)
-      ..writeByte(13)
+      ..writeByte(12)
       ..write(obj.updatedAt);
   }
 

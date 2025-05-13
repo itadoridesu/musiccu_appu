@@ -10,6 +10,8 @@ class AAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.onTapA,
     this.onTapL,
+    this.leadingWidget,
+    this.actionsWidget,
   });
 
   final IconData? icon1;
@@ -17,25 +19,30 @@ class AAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onTapL;
   final VoidCallback? onTapA;
+  final Widget? leadingWidget;
+  final Widget? actionsWidget;
 
   @override
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
 
     return AppBar(
-      leading: icon1 != null
-          ? Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: GestureDetector(
-                onTap: onTapL,
-                child: Icon(icon1, color: dark ? Colors.white : Colors.black),
-              ),
-            )
-          : null,
+      leading: leadingWidget ??
+          (icon1 != null
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: GestureDetector(
+                    onTap: onTapL,
+                    child: Icon(icon1, color: dark ? Colors.white : Colors.black),
+                  ),
+                )
+              : null),
       title: Text(title, style: Theme.of(context).textTheme.headlineSmall),
       centerTitle: true,
       actions: [
-        if (icon2 != null)
+        if (actionsWidget != null)
+          actionsWidget!
+        else if (icon2 != null)
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: GestureDetector(

@@ -4,10 +4,12 @@ import 'package:musiccu/utils/helpers/helper_functions.dart';
 
 class ThreeTextsRow extends StatelessWidget {
   const ThreeTextsRow({
-    super.key, required this.text1, required this.text2, required this.text3,
+    super.key, required this.text1, required this.text2, required this.durationMs,
   });
 
-  final String text1, text2, text3;
+  final String text1, text2;
+
+  final int durationMs;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,9 @@ class ThreeTextsRow extends StatelessWidget {
           flex: 1,
           child: Text(
             text1,
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark?AColors.artistTextColor : AColors.artistTextColorDark),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark ? AColors.artistTextColor : AColors.artistTextColorDark),
           ),
         ),
     
@@ -28,15 +32,19 @@ class ThreeTextsRow extends StatelessWidget {
           flex: 1,
           child: Text(
             text2,
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark?AColors.artistTextColor : AColors.artistTextColorDark),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark ? AColors.artistTextColor : AColors.artistTextColorDark),
           ),
         ),
     
         Flexible(
           flex: 1,
           child: Text(
-            text3,
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark?AColors.artistTextColor : AColors.artistTextColorDark),
+            THelperFunctions.formatDuration(Duration(milliseconds: durationMs)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: dark ? AColors.artistTextColor : AColors.artistTextColorDark),
           ),
         )
       ],

@@ -8,11 +8,9 @@ import 'package:musiccu/features/musiccu/screens/now_playing/widgets/yes_lyrics_
 class YesLyricsLayout extends StatelessWidget {
   const YesLyricsLayout({
     super.key,
-    required this.song,
     required this.showIcon,
   });
 
-  final SongModel song;
   final bool showIcon;
 
   @override
@@ -22,7 +20,7 @@ class YesLyricsLayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         
-        SongHorizontal(song: song, showIcon: showIcon),
+        SongHorizontal(showIcon: showIcon),
 
         const SizedBox(height: 21,),
 

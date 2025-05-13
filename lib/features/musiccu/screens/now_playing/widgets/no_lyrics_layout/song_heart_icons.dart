@@ -2,15 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
-import 'package:musiccu/features/musiccu/controllers/favorite_controller.dart';
-import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
+import 'package:musiccu/features/musiccu/controllers/predifined_playlists.dart';
+import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing_yes_lyrics.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 
 class SongHeartIcon extends StatelessWidget {
-  const SongHeartIcon({super.key, required this.song, required this.showIcon});
+  const SongHeartIcon({super.key, required this.showIcon});
 
-  final SongModel song;
   final bool showIcon;
 
   @override
@@ -31,25 +30,27 @@ class SongHeartIcon extends StatelessWidget {
               width: 50,
               onTap:
                   () => Get.to(
-                    () => NowPlayingYesLyrics(song: song, showIcon: showIcon),
-                    duration: Duration(milliseconds: 600),
+                    () => NowPlayingYesLyrics(showIcon: showIcon),
+                    duration: Duration(milliseconds: 500),
                   ),
             ),
           ),
-          Obx(
-            () => ContainerIcon(
-              icon1: !FavoriteController.instance.isFavoriteRx(song).value ? Icon(
-                CupertinoIcons.heart,
-                color: AColors.artistTextColorDark,
-              ) : Icon(
-                CupertinoIcons.heart_fill,
-                color: Colors.red,
-              ),
+          Obx(() {
+            final song = SongController.instance.selectedSong.value;
+
+            return ContainerIcon(
+              icon1:
+                  !PredefinedPlaylistsController.instance.isFavoriteRx(song!.id).value
+                      ? Icon(
+                        CupertinoIcons.heart,
+                        color: AColors.artistTextColorDark,
+                      )
+                      : Icon(CupertinoIcons.heart_fill, color: Colors.red),
               height: 50,
               width: 50,
-              onTap: () => FavoriteController.instance.toggleFavorite(song),
-            ),
-          ),
+              onTap: () => PredefinedPlaylistsController.instance.toggleFavorite(song!.id),
+            );
+          }),
         ],
       ),
     );

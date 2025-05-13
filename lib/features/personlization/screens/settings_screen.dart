@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
+import 'package:musiccu/common/widgets/now_playing_mini_bar.dart';
 import 'package:musiccu/common/widgets/tiles/settings_tile.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/playlists/playlists_screen.dart';
@@ -55,6 +56,7 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: NowPlayingMiniBar(),
     );
   }
 }

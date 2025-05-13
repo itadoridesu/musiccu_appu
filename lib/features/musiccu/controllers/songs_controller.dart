@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/common/widgets/texts/moving_text.dart';
+import 'package:musiccu/common/widgets/tiles/playlist_tile_simple.dart';
 import 'package:musiccu/common/widgets/tiles/text_icon.dart';
 import 'package:musiccu/data/repositories/songs_repository.dart';
+import 'package:musiccu/features/musiccu/controllers/predifined_playlists.dart';
+import 'package:musiccu/features/musiccu/controllers/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
-import 'package:musiccu/features/musiccu/screens/playlists/playlists_screen.dart';
 import 'package:musiccu/features/personlization/controllers/theme_controller.dart';
+import 'package:musiccu/features/personlization/screens/update_song/edit_song_screen.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 import 'package:musiccu/utils/popups/loader.dart';
@@ -28,11 +32,15 @@ class SongController extends GetxController {
   // Dependencies
   final SongRepository _songRepository = Get.put(SongRepository());
 
+  late final _playlistController = PlaylistController.instance;
+
+  late final _predefinedPlaylistsController = PredefinedPlaylistsController.instance;
+
   @override
   void onInit() {
     super.onInit();
     loadSongsFromHive();
-    _handleNavigation();
+    // _handleNavigation();
   }
 
   Future<void> loadSongsFromHive() async {
@@ -48,27 +56,27 @@ class SongController extends GetxController {
     }
   }
 
-  // Future<void> deleteAll() async {
-  //   try {
+  Future<void> deleteAll() async {
+    try {
 
-  //     await _songRepository.clearAllSongsFromHive(); // Clear all songs from Hive
-  //     songs.value = await _songRepository.getSongsFromHive();
+      await _songRepository.clearAllSongsFromHive(); // Clear all songs from Hive
+      songs.value = await _songRepository.getSongsFromHive();
 
-  //     // On success, show success snack bar
-  //     TLoaders.successSnackBar(
-  //       title: 'Songs Cleared',
-  //       message: 'All songs have been cleared successfully.',
-  //     );
-  //   } catch (e) {
+      // On success, show success snack bar
+      TLoaders.successSnackBar(
+        title: 'Songs Cleared',
+        message: 'All songs have been cleared successfully.',
+      );
+    } catch (e) {
 
-  //     TLoaders.errorSnackBar(
-  //       title: 'Error',
-  //       message: e.toString(),
-  //     );
-  //   }
-  // }
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: e.toString(),
+      );
+    }
+  }
 
-  Future<void> importSongsFromFile() async {
+ Future<void> importSongsFromFile() async {
     try {
       isLoading.value = true;
 
@@ -89,6 +97,8 @@ class SongController extends GetxController {
       TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
+
+
 
   /// delete single song
   Future<void> deleteSong(SongModel song) async {
@@ -120,29 +130,79 @@ class SongController extends GetxController {
     }
   }
 
-  void updateSelectedSong(SongModel song, {bool navigate = false}) {
-    selectedSong.value = song;
-    shouldNavigate.value = navigate; // <- flag to trigger nav
-  }
+ Future<void> updateSong(SongModel updatedSong) async {
+  try {
+    final index = songs.indexWhere((s) => s.id == updatedSong.id);
+    if (index == -1) throw Exception('Song not found.');
 
-void _handleNavigation() {
-  ever(shouldNavigate, (bool shouldNav) {
-    if (shouldNav && selectedSong.value != null) {
-      shouldNavigate.value = false;
+    await _songRepository.updateSong(updatedSong);
+
+    songs[index] = updatedSong;
+    songs.refresh();
+
+ if (selectedSong.value?.id == updatedSong.id) {
+  // Update fields manually without changing the instance
+  selectedSong.value!.songName = updatedSong.songName;
+  selectedSong.value!.artistName = updatedSong.artistName;
+  selectedSong.value!.albumName = updatedSong.albumName;
+  selectedSong.value!.imagePath = updatedSong.imagePath;
+
+  selectedSong.refresh(); 
+}
+
+  } catch (e) {
+    rethrow;
+  }
+}
+
+
+  void updateSelectedSong(
+    SongModel song, {
+    bool navigate = false,
+    BuildContext? context,
+  }) {
+    // Same song - just open NowPlaying
+    if (selectedSong.value?.id == song.id) {
+      Get.to(
+        () => NowPlayingNoLyrics(showIcon: false),
+        duration: const Duration(milliseconds: 600),
+      );
+      return;
+    }
+
+    // New song selected
+    selectedSong.value = song;
+
+    if (context != null) {
+      // Get the route where we're selecting from
+      final modalRoute = ModalRoute.of(context);
+
+      // Pop until we reach the original screen
+      Navigator.popUntil(context, (route) {
+        // This pops past any NowPlaying/Lyrics screens
+        return route == modalRoute;
+      });
+
+      // Then push new NowPlaying
+      Get.to(
+        () => NowPlayingNoLyrics(showIcon: false),
+        duration: const Duration(milliseconds: 600),
+      );
+    } else {
+      // Fallback without context
       Get.offUntil(
         GetPageRoute(
-          page: () => NowPlayingNoLyrics(song: selectedSong.value!, showIcon: false),
-          transitionDuration: Duration(milliseconds: 600),  
+          page: () => NowPlayingNoLyrics(showIcon: false),
+          transitionDuration: const Duration(milliseconds: 600),
         ),
-        (route) => route.isFirst, // Keeps the first route (HomeScreen)
+        (route) => route.isFirst,
       );
     }
-  });
-}
+  }
 
   /// Ui calling methods
 
-  void showSongMenu(SongModel song, BuildContext context) {
+  void showSongMenu(SongModel song, BuildContext context, int index) {
     final dark = ThemeController.instance.isDarkMode.value;
     final backgroundColor = dark ? AColors.dark : AColors.pageTitleColor;
 
@@ -161,6 +221,10 @@ void _handleNavigation() {
                 onTap: () {
                   Navigator.pop(context);
                   updateSelectedSong(song, navigate: true);
+                  QueueController.instance.setQueue(
+                    songs,
+                    startingIndex: index,
+                  );
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,6 +292,7 @@ void _handleNavigation() {
                 icon: Icons.edit,
                 onPressed: () {
                   Navigator.pop(context);
+                  Get.to(() => EditSongScreen(song: song));
                 },
               ),
               TextIcon(
@@ -235,8 +300,7 @@ void _handleNavigation() {
                 icon: Icons.playlist_add,
                 onPressed: () {
                   Navigator.pop(context);
-                  _showPlaylistBottomSheet(context);
-
+                  showPlaylistBottomSheet(context, song.id);
                 },
               ),
               TextIcon(
@@ -316,47 +380,132 @@ void _handleNavigation() {
     );
   }
 
- void _showPlaylistBottomSheet(BuildContext context) {
-  final dark = THelperFunctions.isDarkMode(context);
-  final backgroundColor = dark ? AColors.dark : AColors.pageTitleColor;
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => Container(
-      height: MediaQuery.of(context).size.height * 0.75,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      child: Column(
-        children: [
-          
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  void showPlaylistBottomSheet(BuildContext context, String songId) {
+    if (!Get.isRegistered<PlaylistController>()) {
+      Get.put(PlaylistController());
+    }
+    final dark = THelperFunctions.isDarkMode(context);
+    final backgroundColor = dark ? AColors.dark : AColors.pageTitleColor;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.5,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(25),
+              ),
+            ),
+            child: Column(
               children: [
-                Text(
-                  'Add to Playlist',
-                  style: Theme.of(context).textTheme.titleLarge,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Add to Playlist',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Get.back();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+                Expanded(
+                  child: Obx(() {
+                    final playlists = _playlistController.playlists;
+
+                    // Get favorites image path (first favorite song or fallback)
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount:
+                            playlists.length +
+                            2, // +1 for Add, +1 for Favorites
+                        separatorBuilder:
+                            (context, index) => const SizedBox(height: 15),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 0,
+                                ),
+                                leading: Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        dark
+                                            ? AColors.artistTextColorDark
+                                            : const Color.fromARGB(
+                                              255,
+                                              190,
+                                              192,
+                                              197,
+                                            ),
+                                    borderRadius: BorderRadius.circular(17),
+                                  ),
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 50,
+                                    color:
+                                        dark
+                                            ? AColors.artistTextColor
+                                            : AColors.inverseDarkGrey,
+                                  ),
+                                ),
+                                title: const Text('Add New Playlist'),
+                                onTap: () {
+                                  _playlistController
+                                      .showCreatePlaylistDialog();
+                                },
+                              ),
+                            );
+                          } else if (index == 1) {
+                            return PlaylistTileSimple(
+                              playlist: _predefinedPlaylistsController.favorites.value,
+                              onTap: () {
+                                Get.back();
+                                _predefinedPlaylistsController.toggleFavorite(songId, usualToggle: false);
+                              },
+                            );
+                          } else {
+                            final playlist =
+                                playlists[index - 2]; // offset by 2
+                            return PlaylistTileSimple(
+                              playlist: playlist,
+                              onTap: () {
+                                Get.back();
+                                _playlistController.addSongToPlaylist(
+                                  playlist.id,
+                                  songId,
+                                );
+                              },
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  }),
                 ),
+
+                const SizedBox(height: 15),
               ],
             ),
           ),
-          // Your playlist content goes here
-          Expanded(
-            child: PlaylistsScreen(bottomSheet: true),
-          ),
-        ],
-      ),
-    ),
-    isDismissible: true,    
-  );
+    );
+  }
 }
-}
-

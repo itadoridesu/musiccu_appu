@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/data/repositories/playlists_repository.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
+import 'package:musiccu/features/musiccu/screens/playlists/inside_playlist/inside_playlist.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 import 'package:musiccu/utils/popups/loader.dart';
@@ -11,178 +13,294 @@ import 'package:musiccu/utils/popups/loader.dart';
 class PlaylistController extends GetxController {
   static PlaylistController get instance => Get.find();
 
-  final _playlistRepo = Get.put(PlaylistRepository());
+  final _playlistRepo = PlaylistRepository.instance;
+
+  // Reactive state
   final RxList<PlaylistModel> playlists = <PlaylistModel>[].obs;
-  final RxList<SongModel> playlistSongs = <SongModel>[].obs; // New reactive list for playlist songs
-  final Rx<PlaylistModel?> currentPlaylist = Rx<PlaylistModel?>(null); // Track current playlist
+
+  final Rx<PlaylistModel?> selectedPlaylist = Rx<PlaylistModel?>(null);
+
+  final RxBool shouldNavigateToPlaylist = false.obs;
+
+  final RxBool refreshFlag = false.obs;
 
   final songs = SongController.instance.songs;
 
-
+  // the song id that called the playlist bottom sheet
 
   @override
   void onInit() {
     super.onInit();
     loadPlaylists();
+    _handlePlaylistNavigation();
   }
 
   Future<void> loadPlaylists() async {
     try {
-      
-      // Fetch playlists from repository
       final loadedPlaylists = await _playlistRepo.getAllPlaylists();
-      
-      // Update reactive list
-      playlists.assignAll(loadedPlaylists);
+
+      final userPlaylists =
+          loadedPlaylists.where((playlist) {
+            return playlist.id != 'predef_favorites' &&
+                playlist.id != 'predef_most_played' &&
+                playlist.id != 'predef_recently_played';
+          }).toList();
+
+      playlists.assignAll(userPlaylists);
     } catch (e) {
-      print("THIS IS MY ERRRRRRRRRRRRRRRRRRRRRRRRRRRROOOOOOOOOOOOOOOOOOR: " + e.toString());
       TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Failed to load playlists. Please try again.',
       );
-      playlists.clear(); 
+      playlists.clear();
     }
   }
 
   // Add this to your PlaylistController class
-Future<void> deleteAllPlaylists() async {
-  try {
-    await _playlistRepo.deleteAllPlaylists();
-    playlists.clear();
-    playlistSongs.clear();
-    currentPlaylist.value = null;
-  } catch (e) {
-    TLoaders.errorSnackBar(
-      title: 'Error',
-      message: 'Failed to delete playlists: ${e.toString()}',
-    );
-    rethrow;
-  }
-}
-
-    // New method to load songs for a specific playlist
-  Future<void> loadPlaylistSongs(String playlistId) async {
+  Future<void> deleteAllPlaylists() async {
     try {
-      // Get the playlist
-      final playlist = await _playlistRepo.getPlaylist(playlistId);
-      if (playlist == null) return;
-      
-      // Set as current playlist
-      currentPlaylist.value = playlist;
-      
-      // Get all songs from SongController
-      final allSongs = songs;
-      
-      // Filter songs that are in this playlist
-      final songsInPlaylist = allSongs.where(
-        (song) => playlist.songIds.contains(song.id)
-      ).toList();
-      
-      // Update reactive list
-      playlistSongs.assignAll(songsInPlaylist);
-      
+      await _playlistRepo.deleteAllPlaylists();
+      playlists.clear();
+      TLoaders.successSnackBar(title: "Yes", message: "playlists deleted");
     } catch (e) {
       TLoaders.errorSnackBar(
         title: 'Error',
-        message: 'Failed to load playlist songs. Please try again.',
+        message: 'Failed to delete playlists: ${e.toString()}',
       );
-      playlistSongs.clear();
+      rethrow;
+    }
+  }
+
+  // fetch songs for playlist
+  Future<List<SongModel>> fetchSongsOfSelectedPlaylist() async {
+    try {
+      final playlist = selectedPlaylist.value;
+      if (playlist == null) return [];
+
+      // Filter all songs to find the ones that match IDs in the playlist
+      final songsInPlaylist =
+          songs.where((song) => playlist.songIds.contains(song.id)).toList();
+
+      return songsInPlaylist;
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Could not load songs for playlist: ${e.toString()}',
+      );
+      return [];
     }
   }
 
   Future<void> addPlaylist(String playlistName) async {
     try {
-
-      final playlist = PlaylistModel.createNewPlaylist(playlistName);
+      final playlist = await PlaylistModel.createNewPlaylist(playlistName);
       await _playlistRepo.addPlaylist(playlist);
-      playlists.add(playlist);
+
+      // Add to the beginning of the list instead of the end
+      playlists.insert(0, playlist);
 
       TLoaders.successSnackBar(
         title: 'Success',
         message: 'Playlist added successfully!',
       );
-
     } catch (e) {
-      print("THIS IS THE ERROR I AM GETTING HHHHHHHH" +e.toString());
       TLoaders.errorSnackBar(
         title: 'Error',
-         message: 'Failed to add playlist: ${e.toString()}'
+        message: 'Failed to add playlist: ${e.toString()}',
       );
     }
   }
 
-  /// UI 
-void showCreatePlaylistDialog() {
-  final TextEditingController playlistNameController = TextEditingController();
-  final dark = THelperFunctions.isDarkMode(Get.context!);
-  final textNotEmpty = false.obs;
+  List<SongModel> getFirstTwoSongs(PlaylistModel playlist) {
+    final result = <SongModel>[];
+    for (final id in playlist.songIds) {
+      final match = songs.firstWhereOrNull((s) => s.id == id);
+      if (match != null) result.add(match);
+      if (result.length == 2) break;
+    }
+    return result;
+  }
 
-  // 🔥 Add a listener to update `textNotEmpty`
-  playlistNameController.addListener(() {
-    textNotEmpty.value = playlistNameController.text.trim().isNotEmpty;
-  });
+  // add songs to playlist
+  Future<void> addSongToPlaylist(String playlistId, String songId) async {
+    try {
+      await _playlistRepo.addSongToPlaylist(playlistId, songId);
+      final updatedPlaylist = await _playlistRepo.getPlaylist(playlistId);
 
-  showDialog(
-    context: Get.context!,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: dark ? AColors.darkGray2 : AColors.inverseDarkGrey,
-        title: Text('Add New Playlist'),
-        titleTextStyle: Theme.of(context).textTheme.headlineSmall,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Obx(() {
-              return TextField(
-                controller: playlistNameController,
-                decoration: InputDecoration(
-                  hintText: 'Playlist Name',
-                  hintStyle: Theme.of(context).textTheme.bodySmall,
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AColors.primary),
-                  ),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color: textNotEmpty.value ? AColors.primary : Colors.grey,
+      if (updatedPlaylist != null) {
+        final index = playlists.indexWhere((p) => p.id == playlistId);
+        if (index != -1) {
+          playlists[index] = updatedPlaylist;
+          playlists.refresh();
+        }
+
+        TLoaders.successSnackBar(
+          title: 'Success',
+          message: 'Song added to playlist!',
+        );
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Error', message: '${e.toString()}');
+    }
+  }
+
+  void _handlePlaylistNavigation() {
+    ever(shouldNavigateToPlaylist, (shouldNavigate) {
+      if (shouldNavigate && selectedPlaylist.value != null) {
+        shouldNavigateToPlaylist.value = false;
+        Get.to(() => InsidePlaylist(playlist: selectedPlaylist.value!));
+      }
+    });
+  }
+
+  void updatePlaylist(PlaylistModel playlist, {bool navigate = false}) {
+    selectedPlaylist.value = playlist;
+    shouldNavigateToPlaylist.value = navigate;
+  }
+
+  /// UI
+  void showCreatePlaylistDialog() {
+    final TextEditingController playlistNameController =
+        TextEditingController();
+    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final textNotEmpty = false.obs;
+
+    // 🔥 Add a listener to update `textNotEmpty`
+    playlistNameController.addListener(() {
+      textNotEmpty.value = playlistNameController.text.trim().isNotEmpty;
+    });
+
+    showDialog(
+      context: Get.context!,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: dark ? AColors.darkGray2 : AColors.inverseDarkGrey,
+          title: Text('Add New Playlist'),
+          titleTextStyle: Theme.of(context).textTheme.headlineSmall,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Obx(() {
+                return TextField(
+                  controller: playlistNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Playlist Name',
+                    hintStyle: Theme.of(context).textTheme.bodySmall,
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AColors.primary),
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color:
+                            textNotEmpty.value ? AColors.primary : Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              'Cancel',
-              style: TextStyle(fontSize: 14),
-            ),
+                );
+              }),
+            ],
           ),
-          Obx(() => GestureDetector(
-                onTap: textNotEmpty.value
-                    ? () {
-                        Get.back();
-                        addPlaylist(playlistNameController.text.trim());
-                      }
-                    : null,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel', style: TextStyle(fontSize: 14)),
+            ),
+            Obx(
+              () => GestureDetector(
+                onTap:
+                    textNotEmpty.value
+                        ? () {
+                          Get.back();
+                          addPlaylist(playlistNameController.text.trim());
+                        }
+                        : null,
                 child: Text(
                   'Create',
                   style: TextStyle(
-                    color:
-                        textNotEmpty.value ? AColors.primary : Colors.grey,
-                    fontWeight: textNotEmpty.value
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    color: textNotEmpty.value ? AColors.primary : Colors.grey,
+                    fontWeight:
+                        textNotEmpty.value
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                   ),
                 ),
-              )),
-        ],
-      );
-    },
-  );
-}
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+  // playlist bottom sheet options + it uesses the current playslut defined here
+  void showPlaylistOptions(BuildContext context) {
+    final dark = THelperFunctions.isDarkMode(context);
+    final textColor = dark ? AColors.darkGray2 : AColors.inverseDarkGrey;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: dark ? AColors.darkGray2 : AColors.inverseDarkGrey,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Add songs to playlist
+              ListTile(
+                leading: Icon(Icons.add, color: textColor),
+                title: Text(
+                  'Add Songs',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
+                ),
+                onTap: () => _handleAddSongs(),
+              ),
+
+              // manage playlist
+              ListTile(
+                leading: Icon(Icons.check_circle_outline, color: textColor),
+                title: Text(
+                  'Manage Playlist',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
+                ),
+                onTap: () => _handleManagePlaylist(),
+              ),
+
+              // delete playlist
+              ListTile(
+                leading: Icon(CupertinoIcons.trash, color: textColor),
+                title: Text(
+                  'Delete Playlist',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
+                ),
+                onTap: () => _handleDeletePlaylist(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _handleAddSongs() {
+    Get.back(); // Implement song addition logic
+  }
+
+  void _handleManagePlaylist() {
+    Get.back(); // Implement playlist management
+  }
+
+  void _handleDeletePlaylist() {
+    Get.back(); // Implement playlist deletion
+  }
 }

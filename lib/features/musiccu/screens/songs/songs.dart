@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
-import 'package:musiccu/common/widgets/glassmorhphism/glass_effect_container.dart';
-import 'package:musiccu/common/widgets/tiles/song_tile.dart';
-import 'package:musiccu/features/musiccu/controllers/audio_controller.dart';
+import 'package:musiccu/common/widgets/now_playing_mini_bar.dart';
+import 'package:musiccu/features/musiccu/controllers/predifined_playlists.dart';
+import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/image_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/songs/widgets/all_songs_container.dart';
@@ -16,13 +16,15 @@ class SongsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final imageController = Get.put(ImageController());
+    Get.put(ImageController());
 
+    final controller = SongController.instance;
 
-    final controller = Get.put(SongController());
+    Get.put(QueueController());
 
-    Get.put(AudioController());
+    Get.put(PredefinedPlaylistsController());
 
+    
     return Scaffold(
       appBar: AAppBar(
         icon1: Icons.chevron_left,
@@ -44,22 +46,8 @@ class SongsScreen extends StatelessWidget {
           return AllSongsContainer(songs: songs);
         }),
       ),
-       bottomNavigationBar: Obx(() {
-        final selected = controller.selectedSong.value;
-        if (selected == null) return SizedBox.shrink();
-
-        // hero tags only fire on showIcon=false
-        return GlassEffectContainer(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-            child: SongTile(
-              song: selected,
-              showIcon: false,            
-              isPauseStop: true,
-            ),
-          ),
-        );
-      }),
+       bottomNavigationBar: NowPlayingMiniBar(),
     );
   }
 }
+

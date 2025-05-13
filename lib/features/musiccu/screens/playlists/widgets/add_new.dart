@@ -14,11 +14,11 @@ class AddNew extends StatelessWidget {
     return GestureDetector(
       onTap: () => PlaylistController.instance.showCreatePlaylistDialog(),
       child: Container(
-        height: 130,
+        height: 125,
         decoration: BoxDecoration(
           color: dark ? const Color.fromARGB(255, 31, 30, 30)
                 : AColors.songTitleColor,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(25),
         ),
         child: Center(
           child: Column(

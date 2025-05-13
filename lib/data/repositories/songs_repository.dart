@@ -9,15 +9,14 @@ class SongRepository extends GetxController {
   static SongRepository get instance => Get.find();
   static const String _songsBoxName = 'songsBox';
 
-  // Clears all songs from Hive
-  // Future<void> clearAllSongsFromHive() async {
-  //   try {
-  //     final box = Hive.box<SongModel>(_songsBoxName);
-  //     await box.clear();
-  //   } catch (e) {
-  //     throw 'Something went wrong while clearing your songs. Please try again.';
-  //   }
-  // }
+  Future<void> clearAllSongsFromHive() async {
+    try {
+      final box = Hive.box<SongModel>(_songsBoxName);
+      await box.clear();
+    } catch (e) {
+      throw 'Something went wrong while clearing your songs. Please try again.';
+    }
+  }
 
   // Pick songs and save them to Hive (without duplicates)
   Future<void> pickAndSaveSongs() async {
@@ -51,7 +50,8 @@ class SongRepository extends GetxController {
             return !existingSongs.any(
               (existingSong) =>
                   existingSong.songName == newSong.songName &&
-                  existingSong.artistName == newSong.artistName,
+                  existingSong.artistName == newSong.artistName ||
+                  existingSong.audioUrl == newSong.audioUrl, // This is not really doing anything because of file picker
             );
           }).toList();
 

@@ -6,16 +6,16 @@ part 'playlist_model.g.dart';
 class PlaylistModel {
   @HiveField(0)
   final String id;
-  
+
   @HiveField(1)
   String name;
-  
+
   @HiveField(2)
   List<String> songIds;
-  
+
   @HiveField(3)
   final DateTime createdAt;
-  
+
   @HiveField(4)
   DateTime updatedAt;
 
@@ -29,10 +29,9 @@ class PlaylistModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.coverImagePath,
-  }) : 
-    songIds = songIds ?? [],
-    createdAt = createdAt ?? DateTime.now(),
-    updatedAt = updatedAt ?? DateTime.now();
+  }) : songIds = songIds ?? [],
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   PlaylistModel copyWith({
     String? id,
@@ -52,14 +51,16 @@ class PlaylistModel {
     );
   }
 
-  static PlaylistModel createNewPlaylist(String name) {
-    return PlaylistModel(
-      id: "",
-      name: name,
-      songIds: [],
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+  static Future<PlaylistModel> createNewPlaylist(String name) async {
+    final id = await _getNextId();
+    return PlaylistModel(id: id.toString(), name: name, songIds: []);
+  }
+
+  static Future<int> _getNextId() async {
+    var box = await Hive.openBox<int>('playlistIdCounterBox');
+    int nextId = box.get('currentId', defaultValue: 0)!;
+    await box.put('currentId', nextId + 1);
+    return nextId;
   }
 
   Map<String, dynamic> toJson() => {
@@ -80,8 +81,6 @@ class PlaylistModel {
     coverImagePath: json['coverImagePath'],
   );
 
-  static PlaylistModel empty() => PlaylistModel(
-    id: '',
-    name: 'Untitled Playlist',
-  );
+  static PlaylistModel empty() =>
+      PlaylistModel(id: '', name: 'Untitled Playlist');
 }

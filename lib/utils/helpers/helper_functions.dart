@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 class THelperFunctions {
   static Color? getColor(String value) {
@@ -41,9 +42,9 @@ class THelperFunctions {
   }
 
   static void showSnackBar(String message) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      Get.context!,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   static void showAlert(String title, String message) {
@@ -65,10 +66,7 @@ class THelperFunctions {
   }
 
   static void navigateToScreen(BuildContext context, Widget screen) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   static String truncateText(String text, int maxLength) {
@@ -99,17 +97,28 @@ class THelperFunctions {
   //   return DateFormat(format).format(date);
   // }
 
-// file size formatter
-static String formatFileSize(int bytes) {
-  if (bytes <= 0) return "0 B";
-  const suffixes = ["B", "KB", "MB", "GB"];
-  final i = (log(bytes) / log(1024)).floor();
-  return '${(bytes / pow(1024, i)).toStringAsFixed(i == 0 ? 0 : 1)} ${suffixes[i]}';
-}
+  // file size formatter
+  static String formatFileSize(int bytes) {
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB", "GB"];
+    final i = (log(bytes) / log(1024)).floor();
+    return '${(bytes / pow(1024, i)).toStringAsFixed(i == 0 ? 0 : 1)} ${suffixes[i]}';
+  }
 
-/// Format a duration to a string in the format mm:ss
-static String formatDuration(Duration duration) {
+  /// Format a duration to a string in the format mm:ss
+  static String formatDuration(Duration duration) {
+    // Handle negative durations (shouldn't happen but good practice)
+    if (duration.isNegative) return "0:00";
+
     String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    // For durations longer than 1 hour
+    if (duration.inHours > 0) {
+      return '${duration.inHours}:${twoDigits(duration.inMinutes.remainder(60))}:'
+          '${twoDigits(duration.inSeconds.remainder(60))}';
+    }
+
+    // Standard MM:SS format
     return '${twoDigits(duration.inMinutes)}:${twoDigits(duration.inSeconds.remainder(60))}';
   }
 
@@ -120,9 +129,23 @@ static String formatDuration(Duration duration) {
   static List<Widget> wrapWidgets(List<Widget> widgets, int rowSize) {
     final wrappedList = <Widget>[];
     for (var i = 0; i < widgets.length; i += rowSize) {
-      final rowChildren = widgets.sublist(i, i + rowSize > widgets.length ? widgets.length : i + rowSize);
+      final rowChildren = widgets.sublist(
+        i,
+        i + rowSize > widgets.length ? widgets.length : i + rowSize,
+      );
       wrappedList.add(Row(children: rowChildren));
     }
     return wrappedList;
+  }
+
+  static Future<String?> pickImagePathFromGallery() async {
+    try {
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      return pickedFile?.path;
+    } catch (e) {
+      throw 'Failed to pick image'; // Throwing the error
+    }
   }
 }

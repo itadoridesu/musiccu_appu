@@ -18,20 +18,20 @@ class TLoaders {
       SnackBar(
         elevation: 0,
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         backgroundColor: Colors.transparent,
         content: Container(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           margin: EdgeInsets.symmetric(horizontal: horizontalMargin ?? 50),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: backgroundColor ?? (dark ? AColors.darkGray2 : AColors.artistTextColor),
+            color: backgroundColor ?? (dark ? AColors.darkGray2 : AColors.songTitleColor),
           ),
           child: Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               color: dark ? AColors.songTitleColor : AColors.songTitleColorDark,
             ),
           ),

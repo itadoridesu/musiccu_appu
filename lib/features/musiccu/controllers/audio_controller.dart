@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart'; // Import the SongController
 
@@ -17,14 +18,20 @@ class AudioController extends GetxController {
   final Rx<Duration> sliderPosition = Duration.zero.obs;
   final RxBool isDragging = false.obs;
 
+  AudioPlayer get audioPlayer => _audioPlayer;
+
+
   @override
   void onInit() {
     super.onInit();
 
-    // Listen to player state changes
-    _audioPlayer.playerStateStream.listen((playerState) {
-      isPlaying.value = playerState.playing;
-    });
+ _audioPlayer.playerStateStream.listen((state) async {
+    isPlaying.value = state.playing;
+    
+    if (state.processingState == ProcessingState.completed) {
+      await QueueController.instance.handleSongCompletion();
+    }
+  });
 
     _audioPlayer.positionStream.listen((pos) {
       currentPosition.value = pos;

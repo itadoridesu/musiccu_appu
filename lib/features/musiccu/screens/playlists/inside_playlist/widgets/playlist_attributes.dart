@@ -1,0 +1,58 @@
+import 'package:flutter/material.dart';
+import 'package:musiccu/common/widgets/images/rounded_images.dart';
+import 'package:musiccu/features/musiccu/controllers/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
+import 'package:musiccu/utils/constants/colors.dart';
+
+class PlaylistAttributes extends StatelessWidget {
+  const PlaylistAttributes({
+    super.key,
+    required this.playlist,
+  });
+
+  final PlaylistModel playlist;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        RoundedImage(
+          imageUrl: playlist.coverImagePath ??
+              PlaylistController.instance.selectedPlaylist.value?.coverImagePath ??
+              "",
+          height: 250,
+          width: 250,
+        ),
+        const SizedBox(height: 13),
+        // ConstrainedBox to limit the maximum width
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 250), // Match image width
+          child: IntrinsicWidth(
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // Take only needed space
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    playlist.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    overflow: TextOverflow.ellipsis, // Handle overflow
+                    maxLines: 1, // Single line
+                  ),
+                ),
+                const SizedBox(width: 8), // Consistent spacing
+                const Icon(Icons.edit_sharp, size: 20, color: AColors.artistTextColor),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "${playlist.songIds.length} songs",
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}
