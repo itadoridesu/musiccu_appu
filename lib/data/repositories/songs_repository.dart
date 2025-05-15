@@ -24,7 +24,8 @@ class SongRepository extends GetxController {
       // Step 1: Picking files
       final result = await _pickAudioFiles();
       if (result == null) throw 'You cancelled the file selection.';
-      if (result.files.isEmpty) throw 'No audio files were selected. Please choose at least one file.';
+      if (result.files.isEmpty)
+        throw 'No audio files were selected. Please choose at least one file.';
 
       // Step 2: Processing files
       final songs = await _processAudioFiles(result.files);
@@ -50,8 +51,10 @@ class SongRepository extends GetxController {
             return !existingSongs.any(
               (existingSong) =>
                   existingSong.songName == newSong.songName &&
-                  existingSong.artistName == newSong.artistName ||
-                  existingSong.audioUrl == newSong.audioUrl, // This is not really doing anything because of file picker
+                      existingSong.artistName == newSong.artistName ||
+                  existingSong.audioUrl ==
+                      newSong
+                          .audioUrl, // This is not really doing anything because of file picker
             );
           }).toList();
 
@@ -110,6 +113,25 @@ class SongRepository extends GetxController {
       throw 'Failed to delete the song. Please try again.';
     }
   }
+
+  // Add this to your SongRepository
+ Future<void> deleteMultipleSongs(List<String> songIds) async {
+  try {
+    final box = Hive.box<SongModel>(_songsBoxName);
+    
+    // Find all keys matching the song IDs
+    final keysToDelete = box.keys.where((key) {
+      final song = box.get(key);
+      return song != null && songIds.contains(song.id);
+    }).toList();
+
+    if (keysToDelete.isEmpty) return;
+    
+    await box.deleteAll(keysToDelete);
+  } catch (e) {
+    throw 'Failed to delete songs: ${e.toString()}';
+  }
+}
 
   // Private: open file picker
   Future<FilePickerResult?> _pickAudioFiles() async {

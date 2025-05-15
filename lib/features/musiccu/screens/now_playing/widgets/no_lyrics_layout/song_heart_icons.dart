@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
-import 'package:musiccu/features/musiccu/controllers/predifined_playlists.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing_yes_lyrics.dart';
 import 'package:musiccu/utils/constants/colors.dart';

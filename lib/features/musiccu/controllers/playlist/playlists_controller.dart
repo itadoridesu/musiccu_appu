@@ -18,11 +18,13 @@ class PlaylistController extends GetxController {
   // Reactive state
   final RxList<PlaylistModel> playlists = <PlaylistModel>[].obs;
 
-  final Rx<PlaylistModel?> selectedPlaylist = Rx<PlaylistModel?>(null);
+  final selectedPlaylist = Rxn<PlaylistModel>();
+
+  final playlistSongs = Rxn<List<SongModel>>();
 
   final RxBool shouldNavigateToPlaylist = false.obs;
 
-  final RxBool refreshFlag = false.obs;
+  final RxBool isLoading = false.obs;
 
   final songs = SongController.instance.songs;
 
@@ -72,22 +74,21 @@ class PlaylistController extends GetxController {
   }
 
   // fetch songs for playlist
-  Future<List<SongModel>> fetchSongsOfSelectedPlaylist() async {
+  void fetchSongsOfSelectedPlaylist() {
     try {
       final playlist = selectedPlaylist.value;
-      if (playlist == null) return [];
+      if (playlist == null) return;
 
       // Filter all songs to find the ones that match IDs in the playlist
-      final songsInPlaylist =
+      playlistSongs.value =
           songs.where((song) => playlist.songIds.contains(song.id)).toList();
 
-      return songsInPlaylist;
+      playlistSongs.refresh();
     } catch (e) {
       TLoaders.errorSnackBar(
         title: 'Error',
         message: 'Could not load songs for playlist: ${e.toString()}',
       );
-      return [];
     }
   }
 
@@ -111,12 +112,19 @@ class PlaylistController extends GetxController {
     }
   }
 
-  List<SongModel> getFirstTwoSongs(PlaylistModel playlist) {
-    final result = <SongModel>[];
-    for (final id in playlist.songIds) {
-      final match = songs.firstWhereOrNull((s) => s.id == id);
-      if (match != null) result.add(match);
-      if (result.length == 2) break;
+  RxList<SongModel> getFirstTwoSongs(PlaylistModel playlist) {
+    final result = <SongModel>[].obs;
+    try {
+      for (final id in playlist.songIds) {
+        final match = songs.firstWhereOrNull((s) => s.id == id);
+        if (match != null) result.add(match);
+        if (result.length == 2) break;
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Oh Snap!',
+        message: 'An error has occured :( }',
+      );
     }
     return result;
   }
@@ -144,10 +152,84 @@ class PlaylistController extends GetxController {
     }
   }
 
+  /// add multiple songs to playlist
+  Future<void> addSongsToPlaylist(
+    String playlistId,
+    List<String> songIds,
+  ) async {
+    try {
+      isLoading(true);
+
+      // Bulk add to repository
+      await _playlistRepo.addSongsToPlaylist(playlistId, songIds);
+
+      // Get updated playlist
+      final updatedPlaylist = await _playlistRepo.getPlaylist(playlistId);
+
+      if (updatedPlaylist != null) {
+        // Update local state
+        final index = playlists.indexWhere((p) => p.id == playlistId);
+        if (index != -1) {
+          playlists[index] = updatedPlaylist;
+          playlists.refresh();
+        }
+
+        // If currently viewing this playlist, refresh its songs
+        if (selectedPlaylist.value?.id == playlistId) {
+          fetchSongsOfSelectedPlaylist();
+        }
+
+        TLoaders.successSnackBar(
+          title: 'Success',
+          message: 'songs added to playlist successfully',
+        );
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to add songs: ${e.toString()}',
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  // delete songs from playlist
+  // In PlaylistController
+  Future<void> removeSelectedSongs(List<String> songIds, {bool usualCall = true}) async {
+    try {
+      final playlist = selectedPlaylist.value!; // Guaranteed to exist
+      final updatedSongs =
+          playlist.songIds.where((id) => !songIds.contains(id)).toList();
+
+      final updated = playlist.copyWith(songIds: updatedSongs);
+      await _playlistRepo.updatePlaylist(updated);
+
+      // Update state
+      playlists[playlists.indexWhere((p) => p.id == playlist.id)] = updated;
+      selectedPlaylist.value = updated;
+      playlists.refresh();
+      fetchSongsOfSelectedPlaylist();
+
+      if (usualCall) TLoaders.successSnackBar(
+        title: 'Songs removed',
+        message:
+            '${songIds.length} song${songIds.length > 1 ? 's' : ''} deleted',
+      );
+    } catch (e) {
+      if(usualCall) TLoaders.errorSnackBar(
+        title: 'Deletion failed',
+        message: 'Please try again',
+      );
+      rethrow;
+    }
+  }
+
   void _handlePlaylistNavigation() {
     ever(shouldNavigateToPlaylist, (shouldNavigate) {
       if (shouldNavigate && selectedPlaylist.value != null) {
         shouldNavigateToPlaylist.value = false;
+        fetchSongsOfSelectedPlaylist();
         Get.to(() => InsidePlaylist(playlist: selectedPlaylist.value!));
       }
     });

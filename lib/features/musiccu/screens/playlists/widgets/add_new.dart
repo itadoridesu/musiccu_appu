@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:musiccu/features/musiccu/controllers/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 

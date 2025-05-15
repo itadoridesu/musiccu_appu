@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:musiccu/common/styles/hilal_slider.dart';
-import 'package:musiccu/features/musiccu/controllers/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 

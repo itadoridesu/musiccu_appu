@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
-import 'package:musiccu/features/musiccu/controllers/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 

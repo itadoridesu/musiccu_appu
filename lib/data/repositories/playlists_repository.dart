@@ -39,9 +39,31 @@ class PlaylistRepository extends GetxController {
       );
       await updatePlaylist(updatedPlaylist);
     } else {
-      throw "Song already in playlist or playlist not found";
+      throw "Song already in playlist";
     }
   }
+
+  Future<void> addSongsToPlaylist(String playlistId, List<String> songIds) async {
+  final playlist = await getPlaylist(playlistId);
+  if (playlist != null) {
+    // Filter out duplicates (both existing and within new songs)
+    final uniqueNewSongs = songIds.where((newId) => 
+        !playlist.songIds.contains(newId)).toSet().toList();
+    
+    if (uniqueNewSongs.isEmpty) {
+      throw "All songs already exist in playlist";
+    }
+
+    final updatedPlaylist = playlist.copyWith(
+      songIds: [...playlist.songIds, ...uniqueNewSongs],
+      updatedAt: DateTime.now(),
+    );
+    
+    await updatePlaylist(updatedPlaylist);
+  } else {
+    throw "Playlist not found";
+  }
+}
 
   Future<void> removeSongFromPlaylist(String playlistId, String songId) async {
     final playlist = await getPlaylist(playlistId);

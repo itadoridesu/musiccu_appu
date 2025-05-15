@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:musiccu/features/musiccu/controllers/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 

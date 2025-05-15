@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:musiccu/features/musiccu/controllers/image_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/ui_controllers/image_controller.dart';
 
 class RoundedImage extends StatelessWidget {
   const RoundedImage({

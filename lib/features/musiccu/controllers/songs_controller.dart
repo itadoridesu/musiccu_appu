@@ -5,8 +5,8 @@ import 'package:musiccu/common/widgets/texts/moving_text.dart';
 import 'package:musiccu/common/widgets/tiles/playlist_tile_simple.dart';
 import 'package:musiccu/common/widgets/tiles/text_icon.dart';
 import 'package:musiccu/data/repositories/songs_repository.dart';
-import 'package:musiccu/features/musiccu/controllers/predifined_playlists.dart';
-import 'package:musiccu/features/musiccu/controllers/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
@@ -130,6 +130,34 @@ class SongController extends GetxController {
     }
   }
 
+  // Add this to your SongController
+Future<void> deleteMultipleSongs(List<String> songIds) async {
+  try {
+    isLoading.value = true;
+    
+    // Delete all selected songs from Hive
+    await _songRepository.deleteMultipleSongs(songIds);
+
+    // Refresh songs list
+    songs.value = await _songRepository.getSongsFromHive();
+
+    // Clear selected song if it was deleted
+    if (selectedSong.value != null && songIds.contains(selectedSong.value!.id)) {
+      selectedSong.value = null;
+    }
+
+    TLoaders.successSnackBar(
+      title: 'Deleted ${songIds.length} songs',
+      message: 'Songs removed successfully',
+      backgroundColor: Colors.redAccent,
+    );
+    isLoading.value = false;
+  } catch (e) {
+    TLoaders.errorSnackBar(title: 'Error', message: e.toString());
+    isLoading.value = false;
+  } 
+}
+
  Future<void> updateSong(SongModel updatedSong) async {
   try {
     final index = songs.indexWhere((s) => s.id == updatedSong.id);
@@ -161,6 +189,7 @@ class SongController extends GetxController {
     bool navigate = false,
     BuildContext? context,
   }) {
+
     // Same song - just open NowPlaying
     if (selectedSong.value?.id == song.id) {
       Get.to(
@@ -172,6 +201,9 @@ class SongController extends GetxController {
 
     // New song selected
     selectedSong.value = song;
+
+    _predefinedPlaylistsController.addToRecentlyPlayed(song.id);
+
 
     if (context != null) {
       // Get the route where we're selecting from
@@ -365,6 +397,7 @@ class SongController extends GetxController {
               onPressed: () {
                 Navigator.of(context).pop(); // Close confirmation
                 deleteSong(song); // Perform delete
+                PredefinedPlaylistsController.instance.removeFromPredefinedPlaylists([song.id]);
               },
               child: Text(
                 'Delete',
