@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
+import 'package:musiccu/features/musiccu/controllers/ui_controllers/image_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
+import 'package:musiccu/features/personlization/controllers/edit_playlist_controller.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 import 'package:musiccu/utils/validators/validation.dart';
+
 
 class UpdatePlaylistScreen extends StatelessWidget {
   const UpdatePlaylistScreen({super.key, required this.playlist});
@@ -13,6 +16,8 @@ class UpdatePlaylistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
+    final controller = Get.put(EditPlaylistController());
+    controller.init(playlist);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +34,7 @@ class UpdatePlaylistScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Form(
-            // No controller for now
+            key: controller.editPlaylistFormKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +42,7 @@ class UpdatePlaylistScreen extends StatelessWidget {
                 // Playlist Name Field
                 _buildLabel(context, 'Playlist Name'),
                 TextFormField(
-                  initialValue: playlist.name,
+                  controller: controller.playlistName,
                   validator: (value) => TValidator.validateEmptyText('Playlist Name', value),
                   decoration: InputDecoration(
                     errorStyle: TextStyle(color: Colors.red[700]),
@@ -61,53 +66,30 @@ class UpdatePlaylistScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Description Field (optional)
-                _buildLabel(context, 'Description'),
-                TextFormField(
-                  initialValue: playlist.songIds.first,
-                  decoration: InputDecoration(
-                    border: const UnderlineInputBorder(),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue.withOpacity(0.4),
-                        width: 2.0,
-                      ),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-
                 // Cover Image
                 _buildLabel(context, 'Cover'),
                 const SizedBox(height: 18),
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {},
-                      child: RoundedImage(
-                        imageUrl: playlist.coverImagePath ?? "",
-                        height: 120,
-                        width: 120,
+                Obx(() {
+                  final imagePath = controller.newCoverImagePath.value ?? playlist.coverImagePath;
+                  return Column(
+                    children: [
+                      GestureDetector(
+                        onTap: imagePath != null && imagePath.isNotEmpty 
+                            ? () => ImageController.instance.showEnlargedImage(imagePath)
+                            : null,
+                        child: RoundedImage(
+                          imageUrl: imagePath ?? "",
+                          height: 120,
+                          width: 120,
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Change Image'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-
-                // Read-only Playlist ID
-                _buildLabel(context, 'Playlist ID'),
-                const SizedBox(height: 16),
-                Text(
-                  playlist.id,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                      TextButton(
+                        onPressed: controller.pickNewCoverImage,
+                        child: const Text('Change Image'),
+                      ),
+                    ],
+                  );
+                }),
               ],
             ),
           ),
@@ -116,7 +98,7 @@ class UpdatePlaylistScreen extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: controller.savePlaylistChanges,
           child: const Text('Save'),
         ),
       ),

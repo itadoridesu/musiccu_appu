@@ -11,16 +11,13 @@ import 'package:musiccu/common/widgets/tiles/songtile_simple.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
-import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/features/musiccu/screens/playlists/inside_playlist/widgets/play_shuffle.dart';
 import 'package:musiccu/features/musiccu/screens/playlists/inside_playlist/widgets/playlist_attributes.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 
 class InsidePlaylist extends StatelessWidget {
-  const InsidePlaylist({super.key, required this.playlist});
-
-  final PlaylistModel playlist;
+  const InsidePlaylist({super.key,});
 
   @override
   Widget build(BuildContext context) {
@@ -44,20 +41,18 @@ class InsidePlaylist extends StatelessWidget {
         child: Obx(() {
           final songs = controller.playlistSongs.value;
 
-          if (songs == null) return Center(child: Text("Playlist is Empty"));
-
           return Column(
             children: [
               const SizedBox(height: 10),
-              PlaylistAttributes(playlist: playlist),
+              PlaylistAttributes(),
               const SizedBox(height: 15),
-              PlayShuffle(),
+              if( songs != null && !songs.isEmpty) PlayShuffle(),
               const SizedBox(height: 7),
 
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: songs.length,
+                itemCount: songs!.length,
                 itemBuilder: (_, index) {
                   final song = songs[index];
                   return Padding(
@@ -130,7 +125,7 @@ class InsidePlaylist extends StatelessWidget {
                                       onTap: () {
                                         SelectionUI.showDeleteDialog(
                                           context,
-                                          playlist.name,
+                                          controller.selectedPlaylist.value!.name,
                                         );
                                       },
                                       selectionController: selectionController,

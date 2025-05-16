@@ -288,18 +288,42 @@ Future<void> removeSongFromFavorites(String songId) async {
     }
   }
 
+  // in update playlist screen
+  Future<void> updatePlaylistFields({
+    String? newName,
+    String? newCoverImagePath,
+  }) async {
+    try {
+      final updatedPlaylist = selectedPlaylist.value!.copyWith(
+        name: newName ?? selectedPlaylist.value!.name,
+        coverImagePath: newCoverImagePath ?? selectedPlaylist.value!.coverImagePath,
+        updatedAt: DateTime.now(),
+      );
+
+      await _playlistRepo.updatePlaylist(updatedPlaylist);
+
+      final index = playlists.indexWhere((p) => p.id == updatedPlaylist.id);
+      playlists[index] = updatedPlaylist;
+      selectedPlaylist.value = updatedPlaylist;
+      playlists.refresh();
+    } catch (e) {
+        throw "Failed to update playlist";
+    }
+  }
+
   void _handlePlaylistNavigation() {
     ever(shouldNavigateToPlaylist, (shouldNavigate) {
       if (shouldNavigate && selectedPlaylist.value != null) {
         shouldNavigateToPlaylist.value = false;
         fetchSongsOfSelectedPlaylist();
-        Get.to(() => InsidePlaylist(playlist: selectedPlaylist.value!));
+        Get.to(() => InsidePlaylist());
       }
     });
   }
 
-  void updatePlaylist(PlaylistModel playlist, {bool navigate = false}) {
+  void updatePlaylist(PlaylistModel playlist, String? firstSongImage ,{bool navigate = false}) {
     selectedPlaylist.value = playlist;
+    if(playlist.coverImagePath == null) selectedPlaylist.value!.coverImagePath = firstSongImage;
     shouldNavigateToPlaylist.value = navigate;
   }
 
@@ -353,8 +377,8 @@ Future<void> removeSongFromFavorites(String songId) async {
               child: Text('Cancel', style: TextStyle(fontSize: 14)),
             ),
             Obx(
-              () => GestureDetector(
-                onTap:
+              () => TextButton(
+                onPressed:
                     textNotEmpty.value
                         ? () {
                           Get.back();
@@ -369,6 +393,7 @@ Future<void> removeSongFromFavorites(String songId) async {
                         textNotEmpty.value
                             ? FontWeight.bold
                             : FontWeight.normal,
+                            fontSize: 14
                   ),
                 ),
               ),

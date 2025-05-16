@@ -25,8 +25,7 @@ class AppRoutes {
     GetPage(
       name: ARoutes.insidePlaylist,
       page: () {
-        final playlist = Get.arguments['playlist'];  // example of how you pass and access arguments
-        return InsidePlaylist(playlist: playlist,);
+        return InsidePlaylist();
       },
     ),
     // GetPage(

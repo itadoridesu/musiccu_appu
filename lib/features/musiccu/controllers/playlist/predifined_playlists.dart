@@ -89,14 +89,12 @@ class PredefinedPlaylistsController extends GetxController {
             newSongIds.add(songId);
             await playlistController.addSongToFavorites(songId);
           }
-        }
-      }
-      // Fallback for non-favorites view
-      else {
-        if (isAlreadyFavorite) {
-          newSongIds.remove(songId);
         } else {
-          newSongIds.add(songId);
+          if (isAlreadyFavorite) {
+            newSongIds.remove(songId);
+          } else {
+            newSongIds.add(songId);
+          }
         }
       }
     }
@@ -154,36 +152,39 @@ class PredefinedPlaylistsController extends GetxController {
     }
   }
 
- Future<void> removeMultipleFromFavorites(List<String> songIds) async {
-  try {
-    if (songIds.isEmpty) return;
+  Future<void> removeMultipleFromFavorites(List<String> songIds) async {
+    try {
+      if (songIds.isEmpty) return;
 
-    PlaylistController.instance.removeSelectedSongs(songIds, fromFavorites: true, usualCall: false);
+      PlaylistController.instance.removeSelectedSongs(
+        songIds,
+        fromFavorites: true,
+        usualCall: false,
+      );
 
-    // 1. Update in repository
-    final newSongIds = favorites.value.songIds
-        .where((id) => !songIds.contains(id))
-        .toList();
-    final updated = favorites.value.copyWith(songIds: newSongIds);
+      // 1. Update in repository
+      final newSongIds =
+          favorites.value.songIds.where((id) => !songIds.contains(id)).toList();
+      final updated = favorites.value.copyWith(songIds: newSongIds);
 
-    // 2. Update local state
-    favorites.value = updated;
-    
+      // 2. Update local state
+      favorites.value = updated;
 
-    // 3. Show success feedback
-    TLoaders.successSnackBar(
-      title: 'Removed',
-      message: '${songIds.length} ${songIds.length > 1 ? 'songs' : 'song'} removed from favorites',
-    );
-
-  } catch (e) {
-    TLoaders.errorSnackBar(
-      title: 'Error',
-      message: 'Failed to remove from favorites',
-    );
-    rethrow;
+      // 3. Show success feedback
+      TLoaders.successSnackBar(
+        title: 'Removed',
+        message:
+            '${songIds.length} ${songIds.length > 1 ? 'songs' : 'song'} removed from favorites',
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to remove from favorites',
+      );
+      rethrow;
+    }
   }
-}
+
   // Recently Played methods
   Future<void> addToRecentlyPlayed(String songId) async {
     final newSongIds =

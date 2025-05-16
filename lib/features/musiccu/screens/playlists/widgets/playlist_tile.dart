@@ -154,9 +154,7 @@ class PlayListTile extends StatelessWidget {
         onTap:
             onTap ??
             () {
-              playlistController.updatePlaylist(playlist, navigate: true);
-              playlistController.selectedPlaylist.value!.coverImagePath =
-                  firstSong!.imagePath;
+              playlistController.updatePlaylist(playlist, firstSong?.imagePath ?? "", navigate: true);                  
             },
         child: Padding(
           padding: const EdgeInsets.only(bottom: 10),
@@ -176,7 +174,7 @@ class PlayListTile extends StatelessWidget {
               children: [
                 // Image - Use first song's image or default
                 RoundedImage(
-                  imageUrl: firstSong?.imagePath ?? "",
+                  imageUrl: playlist.coverImagePath ?? firstSong?.imagePath ?? "",
                   height: 100,
                   width: 100,
                   applyImageRadius: true,

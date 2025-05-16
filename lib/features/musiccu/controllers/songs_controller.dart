@@ -34,7 +34,8 @@ class SongController extends GetxController {
 
   late final _playlistController = PlaylistController.instance;
 
-  late final _predefinedPlaylistsController = PredefinedPlaylistsController.instance;
+  late final _predefinedPlaylistsController =
+      PredefinedPlaylistsController.instance;
 
   @override
   void onInit() {
@@ -58,8 +59,8 @@ class SongController extends GetxController {
 
   Future<void> deleteAll() async {
     try {
-
-      await _songRepository.clearAllSongsFromHive(); // Clear all songs from Hive
+      await _songRepository
+          .clearAllSongsFromHive(); // Clear all songs from Hive
       songs.value = await _songRepository.getSongsFromHive();
 
       // On success, show success snack bar
@@ -68,15 +69,11 @@ class SongController extends GetxController {
         message: 'All songs have been cleared successfully.',
       );
     } catch (e) {
-
-      TLoaders.errorSnackBar(
-        title: 'Error',
-        message: e.toString(),
-      );
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
 
- Future<void> importSongsFromFile() async {
+  Future<void> importSongsFromFile() async {
     try {
       isLoading.value = true;
 
@@ -97,8 +94,6 @@ class SongController extends GetxController {
       TLoaders.errorSnackBar(title: 'Error', message: e.toString());
     }
   }
-
-
 
   /// delete single song
   Future<void> deleteSong(SongModel song) async {
@@ -131,65 +126,63 @@ class SongController extends GetxController {
   }
 
   // Add this to your SongController
-Future<void> deleteMultipleSongs(List<String> songIds) async {
-  try {
-    isLoading.value = true;
-    
-    // Delete all selected songs from Hive
-    await _songRepository.deleteMultipleSongs(songIds);
+  Future<void> deleteMultipleSongs(List<String> songIds) async {
+    try {
+      isLoading.value = true;
 
-    // Refresh songs list
-    songs.value = await _songRepository.getSongsFromHive();
+      // Delete all selected songs from Hive
+      await _songRepository.deleteMultipleSongs(songIds);
 
-    // Clear selected song if it was deleted
-    if (selectedSong.value != null && songIds.contains(selectedSong.value!.id)) {
-      selectedSong.value = null;
+      // Refresh songs list
+      songs.value = await _songRepository.getSongsFromHive();
+
+      // Clear selected song if it was deleted
+      if (selectedSong.value != null &&
+          songIds.contains(selectedSong.value!.id)) {
+        selectedSong.value = null;
+      }
+
+      TLoaders.successSnackBar(
+        title: 'Deleted ${songIds.length} songs',
+        message: 'Songs removed successfully',
+        backgroundColor: Colors.redAccent,
+      );
+      isLoading.value = false;
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Error', message: e.toString());
+      isLoading.value = false;
     }
-
-    TLoaders.successSnackBar(
-      title: 'Deleted ${songIds.length} songs',
-      message: 'Songs removed successfully',
-      backgroundColor: Colors.redAccent,
-    );
-    isLoading.value = false;
-  } catch (e) {
-    TLoaders.errorSnackBar(title: 'Error', message: e.toString());
-    isLoading.value = false;
-  } 
-}
-
- Future<void> updateSong(SongModel updatedSong) async {
-  try {
-    final index = songs.indexWhere((s) => s.id == updatedSong.id);
-    if (index == -1) throw Exception('Song not found.');
-
-    await _songRepository.updateSong(updatedSong);
-
-    songs[index] = updatedSong;
-    songs.refresh();
-
- if (selectedSong.value?.id == updatedSong.id) {
-  // Update fields manually without changing the instance
-  selectedSong.value!.songName = updatedSong.songName;
-  selectedSong.value!.artistName = updatedSong.artistName;
-  selectedSong.value!.albumName = updatedSong.albumName;
-  selectedSong.value!.imagePath = updatedSong.imagePath;
-
-  selectedSong.refresh(); 
-}
-
-  } catch (e) {
-    rethrow;
   }
-}
 
+  Future<void> updateSong(SongModel updatedSong) async {
+    try {
+      final index = songs.indexWhere((s) => s.id == updatedSong.id);
+      if (index == -1) throw Exception('Song not found.');
+
+      await _songRepository.updateSong(updatedSong);
+
+      songs[index] = updatedSong;
+      songs.refresh();
+
+      if (selectedSong.value?.id == updatedSong.id) {
+        // Update fields manually without changing the instance
+        selectedSong.value!.songName = updatedSong.songName;
+        selectedSong.value!.artistName = updatedSong.artistName;
+        selectedSong.value!.albumName = updatedSong.albumName;
+        selectedSong.value!.imagePath = updatedSong.imagePath;
+
+        selectedSong.refresh();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   void updateSelectedSong(
     SongModel song, {
     bool navigate = false,
     BuildContext? context,
   }) {
-
     // Same song - just open NowPlaying
     if (selectedSong.value?.id == song.id) {
       Get.to(
@@ -203,7 +196,6 @@ Future<void> deleteMultipleSongs(List<String> songIds) async {
     selectedSong.value = song;
 
     _predefinedPlaylistsController.addToRecentlyPlayed(song.id);
-
 
     if (context != null) {
       // Get the route where we're selecting from
@@ -248,67 +240,73 @@ Future<void> deleteMultipleSongs(List<String> songIds) async {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // Song details
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  Navigator.pop(context);
-                  updateSelectedSong(song, navigate: true);
-                  QueueController.instance.setQueue(
-                    songs,
-                    startingIndex: index,
-                  );
-                },
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Song image
-                    song == selectedSong.value
-                        ? RoundedImage(
-                          imageUrl: song.imagePath,
-                          height: 50,
-                          width: 50,
-                          applyImageRadius: true,
-                          rotate: true,
-                        )
-                        : RoundedImage(
-                          imageUrl: song.imagePath,
-                          height: 50,
-                          width: 50,
-                          applyImageRadius: true,
-                          borderRadius: 15,
-                          rotate: false,
-                        ),
-                    const SizedBox(width: 7),
-                    // Song name and artist
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        song == selectedSong.value
-                            ? MovingText(
-                              text: song.songName,
-                              height: 30,
-                              textStyle: Theme.of(context).textTheme.bodyLarge,
-                              width: 150,
-                            )
-                            : SizedBox(
-                              width: 160,
-                              child: Text(
-                                song.songName,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        SizedBox(
-                          width: 160,
-                          child: Text(
-                            song.artistName,
-                            style: Theme.of(context).textTheme.labelMedium!,
-                            overflow: TextOverflow.ellipsis,
+              Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+                clipBehavior:
+                    Clip.antiAlias, // required for ripple to clip to radius
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                    updateSelectedSong(song, navigate: true);
+                    QueueController.instance.setQueue(
+                      songs,
+                      startingIndex: index,
+                    );
+                  },
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Song image
+                      song == selectedSong.value
+                          ? RoundedImage(
+                            imageUrl: song.imagePath,
+                            height: 50,
+                            width: 50,
+                            applyImageRadius: true,
+                            rotate: true,
+                          )
+                          : RoundedImage(
+                            imageUrl: song.imagePath,
+                            height: 50,
+                            width: 50,
+                            applyImageRadius: true,
+                            borderRadius: 15,
+                            rotate: false,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      const SizedBox(width: 7),
+                      // Song name and artist
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          song == selectedSong.value
+                              ? MovingText(
+                                text: song.songName,
+                                height: 30,
+                                textStyle:
+                                    Theme.of(context).textTheme.bodyLarge,
+                                width: 150,
+                              )
+                              : SizedBox(
+                                width: 160,
+                                child: Text(
+                                  song.songName,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          SizedBox(
+                            width: 160,
+                            child: Text(
+                              song.artistName,
+                              style: Theme.of(context).textTheme.labelMedium!,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Text(
@@ -397,7 +395,8 @@ Future<void> deleteMultipleSongs(List<String> songIds) async {
               onPressed: () {
                 Navigator.of(context).pop(); // Close confirmation
                 deleteSong(song); // Perform delete
-                PredefinedPlaylistsController.instance.removeFromPredefinedPlaylists([song.id]);
+                PredefinedPlaylistsController.instance
+                    .removeFromPredefinedPlaylists([song.id]);
               },
               child: Text(
                 'Delete',
@@ -509,10 +508,16 @@ Future<void> deleteMultipleSongs(List<String> songIds) async {
                             );
                           } else if (index == 1) {
                             return PlaylistTileSimple(
-                              playlist: _predefinedPlaylistsController.favorites.value,
+                              playlist:
+                                  _predefinedPlaylistsController
+                                      .favorites
+                                      .value,
                               onTap: () {
                                 Get.back();
-                                _predefinedPlaylistsController.toggleFavorite(songId, usualToggle: false);
+                                _predefinedPlaylistsController.toggleFavorite(
+                                  songId,
+                                  usualToggle: false,
+                                );
                               },
                             );
                           } else {
