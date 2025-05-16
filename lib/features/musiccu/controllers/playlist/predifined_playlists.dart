@@ -96,7 +96,13 @@ class PredefinedPlaylistsController extends GetxController {
             newSongIds.add(songId);
           }
         }
-      }
+      } else {
+          if (isAlreadyFavorite) {
+            newSongIds.remove(songId);
+          } else {
+            newSongIds.add(songId);
+          }
+        }
     }
     // For forced additions (like from song menu)
     else if (!isAlreadyFavorite) {
