@@ -406,71 +406,112 @@ Future<void> removeSongFromFavorites(String songId) async {
 
   // playlist bottom sheet options + it uesses the current playslut defined here
   void showPlaylistOptions(BuildContext context) {
-    final dark = THelperFunctions.isDarkMode(context);
-    final textColor = dark ? AColors.darkGray2 : AColors.inverseDarkGrey;
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: dark ? AColors.darkGray2 : AColors.inverseDarkGrey,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Add songs to playlist
-              ListTile(
-                leading: Icon(Icons.add, color: textColor),
-                title: Text(
-                  'Add Songs',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
-                ),
-                onTap: () => _handleAddSongs(),
-              ),
+  final dark = THelperFunctions.isDarkMode(context);
+  final backgroundColor = dark ? AColors.dark : AColors.white;
+  final textColor = dark ? AColors.white : AColors.dark;
 
-              // manage playlist
-              ListTile(
-                leading: Icon(Icons.check_circle_outline, color: textColor),
-                title: Text(
-                  'Manage Playlist',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
-                ),
-                onTap: () => _handleManagePlaylist(),
-              ),
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    enableDrag: false, // Disable dragging
+    builder: (context) {
+      return Container(
+        margin: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Add songs option
+            _buildCompactOption(
+              context,
+              icon: Icons.add,
+              title: 'Add Songs',
+              color: textColor,
+              onTap: _handleAddSongs,
+              radius: 12
+            ),
+            
+            // Manage playlist option (with different icon)
+            _buildCompactOption(
+              context,
+              icon: Icons.playlist_add_check,
+              title: 'Manage Playlist',
+              color: textColor,
+              onTap: _handleManagePlaylist,
+              radius: 0
+            ),
+            
+            // Delete option
+            _buildCompactOption(
+              context,
+              icon: Icons.delete_outline,
+              title: 'Delete Playlist',
+              color: Colors.redAccent,
+              onTap: _handleDeletePlaylist,
+              radius: 12
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
-              // delete playlist
-              ListTile(
-                leading: Icon(CupertinoIcons.trash, color: textColor),
-                title: Text(
-                  'Delete Playlist',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.copyWith(fontSize: 18),
-                ),
-                onTap: () => _handleDeletePlaylist(),
-              ),
-            ],
-          ),
-        );
+Widget _buildCompactOption(
+  BuildContext context, {
+  required IconData icon,
+  required String title,
+  required Color color,
+  required VoidCallback onTap,
+  required double radius
+}) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: title == 'Add Songs'
+          ? const BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        )
+          : title == 'Delete Playlist'
+          ? const BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+            )
+          : BorderRadius.zero,
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
       },
-    );
-  }
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: color,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   void _handleAddSongs() {
-    Get.back(); // Implement song addition logic
   }
 
   void _handleManagePlaylist() {
-    Get.back(); // Implement playlist management
   }
 
   void _handleDeletePlaylist() {
-    Get.back(); // Implement playlist deletion
   }
 }
