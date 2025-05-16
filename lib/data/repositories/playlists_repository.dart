@@ -4,9 +4,8 @@ import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.da
 
 class PlaylistRepository extends GetxController {
   static PlaylistRepository get instance => Get.find();
-  
-  final Box<PlaylistModel> _playlistBox = Hive.box<PlaylistModel>("playlists");
 
+  final Box<PlaylistModel> _playlistBox = Hive.box<PlaylistModel>("playlists");
 
   // --- CRUD Operations ---
   Future<void> addPlaylist(PlaylistModel playlist) async {
@@ -29,6 +28,16 @@ class PlaylistRepository extends GetxController {
     await _playlistBox.delete(id);
   }
 
+  Future<void> deleteMultiplePlaylists(List<String> playlistIds) async {
+    if (playlistIds.isEmpty) return;
+
+    try {
+      await _playlistBox.deleteAll(playlistIds);
+    } catch (e) {
+      throw 'Failed to delete selected playlists';
+    }
+  }
+
   // --- Song Management ---
   Future<void> addSongToPlaylist(String playlistId, String songId) async {
     final playlist = await getPlaylist(playlistId);
@@ -43,32 +52,40 @@ class PlaylistRepository extends GetxController {
     }
   }
 
-  Future<void> addSongsToPlaylist(String playlistId, List<String> songIds) async {
-  final playlist = await getPlaylist(playlistId);
-  if (playlist != null) {
-    // Filter out duplicates (both existing and within new songs)
-    final uniqueNewSongs = songIds.where((newId) => 
-        !playlist.songIds.contains(newId)).toSet().toList();
-    
-    if (uniqueNewSongs.isEmpty) {
-      throw "All songs already exist in playlist";
-    }
+  Future<void> addSongsToPlaylist(
+    String playlistId,
+    List<String> songIds, {
+    bool show = true,
+  }) async {
+    final playlist = await getPlaylist(playlistId);
+    if (playlist != null) {
+      // Filter out duplicates (both existing and within new songs)
+      final uniqueNewSongs =
+          songIds
+              .where((newId) => !playlist.songIds.contains(newId))
+              .toSet()
+              .toList();
 
-    final updatedPlaylist = playlist.copyWith(
-      songIds: [...playlist.songIds, ...uniqueNewSongs],
-      updatedAt: DateTime.now(),
-    );
-    
-    await updatePlaylist(updatedPlaylist);
-  } else {
-    throw "Playlist not found";
+      if (show && uniqueNewSongs.isEmpty) {
+        throw "All songs already exist in playlist";
+      }
+
+      final updatedPlaylist = playlist.copyWith(
+        songIds: [...playlist.songIds, ...uniqueNewSongs],
+        updatedAt: DateTime.now(),
+      );
+
+      await updatePlaylist(updatedPlaylist);
+    } else {
+      throw "Playlist not found";
+    }
   }
-}
 
   Future<void> removeSongFromPlaylist(String playlistId, String songId) async {
     final playlist = await getPlaylist(playlistId);
     if (playlist != null) {
-      final updatedSongIds = playlist.songIds.where((id) => id != songId).toList();
+      final updatedSongIds =
+          playlist.songIds.where((id) => id != songId).toList();
       final updatedPlaylist = playlist.copyWith(
         songIds: updatedSongIds,
         updatedAt: DateTime.now(),
@@ -76,15 +93,4 @@ class PlaylistRepository extends GetxController {
       await updatePlaylist(updatedPlaylist);
     }
   }
-
-  Future<void> deleteAllPlaylists() async {
-    await _playlistBox.clear();
-    
-    // Also reset the ID counter
-    final idBox = await Hive.openBox<int>('playlistIdCounterBox');
-    await idBox.put('currentId', 0);
-    await idBox.close();
-  }
-
-
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/features/musiccu/controllers/ui_controllers/image_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';

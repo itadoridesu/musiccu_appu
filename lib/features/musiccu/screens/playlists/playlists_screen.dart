@@ -72,7 +72,6 @@ class PlaylistsScreen extends StatelessWidget {
               icon: Icon(
                 CupertinoIcons.flame, // unfilled flame icon
                 size: 20,
-                color: Colors.deepOrangeAccent,
               ),
               );
             }),
@@ -85,7 +84,6 @@ class PlaylistsScreen extends StatelessWidget {
               icon: Icon(
                 CupertinoIcons.time, // unfilled clock icon
                 size: 20,
-                color: Colors.blueAccent,
               ),
               );
             }),
@@ -93,9 +91,6 @@ class PlaylistsScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: NowPlayingMiniBar(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => playlistController.deleteAllPlaylists(),
-      ),
     );
   }
 }

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:musiccu/common/widgets/container/bottomBarButton.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/common/widgets/select/select_screen.dart';
+import 'package:musiccu/common/widgets/select/selection_bar.dart';
+import 'package:musiccu/common/widgets/select/selection_operations_ui.dart';
+import 'package:musiccu/common/widgets/tiles/songtile_simple.dart';
 import 'package:musiccu/features/musiccu/controllers/selection_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
 
@@ -15,12 +21,14 @@ class PlayListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.icon,
+    this.color,
   });
 
   final PlaylistModel playlist;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Icon? icon;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +50,12 @@ class PlayListTile extends StatelessWidget {
               if (!Get.isRegistered<SelectionController<PlaylistModel>>()) {
                 Get.put(SelectionController<PlaylistModel>());
               }
-              final selectionController =
+              final playlistSelectionController =
                   Get.find<SelectionController<PlaylistModel>>();
 
-              selectionController
+              playlistSelectionController
                   .clearSelection(); // Optional: remove previous selection
-              selectionController.toggleSelection(
+              playlistSelectionController.toggleSelection(
                 playlist.id,
               ); // Pre-select the long-pressed song
 
@@ -58,10 +66,88 @@ class PlayListTile extends StatelessWidget {
                   buildTile:
                       (playlist) => PlayListTile(
                         playlist: playlist,
-                        onTap: () {},
+                        onTap:
+                            () => playlistSelectionController.toggleSelection(
+                              playlist.id,
+                            ),
                         onLongPress: () {},
+                        color:
+                            playlistSelectionController.isSelected(playlist.id)
+                                ? Colors.blue.withOpacity(0.0)
+                                : null,
                       ),
-                  selectionController: selectionController,
+                  padding: 0,
+                  selectionController: playlistSelectionController,
+                  distance: 0,
+                  color:
+                      dark
+                          ? const Color.fromARGB(255, 31, 30, 30)
+                          : AColors.songTitleColor,
+                  selectionColor: Colors.blue.withOpacity(0.2),
+                  actions: [
+                    SelectionAction(
+                      icon: Icons.playlist_add,
+                      label: 'Add to playlist',
+                      onPressed: () {
+                        if (!Get.isRegistered<
+                          SelectionController<SongModel>
+                        >()) {
+                          Get.put(SelectionController<SongModel>());
+                        }
+                        final songSelectionController =
+                            Get.find<SelectionController<SongModel>>();
+
+                        songSelectionController.showReplacementView(
+                          BottomBarButton(
+                            context: context,
+                            onTap: () async {
+                              await playlistSelectionController.addSongsToMultiplePlaylists(songSelectionController);
+                            },
+                            color: Colors.blue,
+                            text: "Add",
+                            selectionController: songSelectionController,
+                          ),
+                        );
+
+                        Get.to(
+                          () => SelectionScreen<SongModel>(
+                            items: SongController.instance.songs,
+                            getId: (song) => song.id,
+                            buildTile: (song) => SongtileSimple(song: song),
+                            selectionController: songSelectionController,
+                            showSearch: true,
+                            onGetBack: () {
+                              songSelectionController.clearSelection();
+                              Get.back();
+                            },
+                            actions: [],
+                          ),
+                        );
+                      },
+                    ),
+                    SelectionAction(
+                      icon: Icons.queue_music,
+                      label: 'Play next',
+                      onPressed: () {},
+                    ),
+                    SelectionAction(
+                      icon: Icons.delete,
+                      label: 'Delete',
+                      onPressed: () {
+                        playlistSelectionController.showReplacementView(
+                                    BottomBarButton(
+                                      context: context,
+                                      onTap: () {
+                                        SelectionUI.showDeletePlaylistsDialog(
+                                          context,
+                                        );
+                                      },
+                                      selectionController: playlistSelectionController,
+                                    ),
+                                  );
+                      },
+                    ),
+                  ],
                 ),
               );
             },
@@ -79,9 +165,10 @@ class PlayListTile extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color:
-                  dark
+                  color ??
+                  (dark
                       ? const Color.fromARGB(255, 31, 30, 30)
-                      : AColors.songTitleColor,
+                      : AColors.songTitleColor),
               borderRadius: BorderRadius.circular(25),
             ),
             child: Row(
@@ -106,7 +193,13 @@ class PlayListTile extends StatelessWidget {
                       // Playlist name
                       Row(
                         children: [
-                          icon ?? Text(""),
+                          icon != null
+                              ? Icon(
+                                  icon!.icon,
+                                  color: icon!.color ?? (dark ? AColors.songTitleColor : AColors.dark),
+                                  size: 20,
+                                )
+                              : const SizedBox.shrink(),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(

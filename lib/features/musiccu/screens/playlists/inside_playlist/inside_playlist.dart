@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
-import 'package:musiccu/common/widgets/container/deleteBottomBar.dart';
+import 'package:musiccu/common/widgets/container/bottomBarButton.dart';
 import 'package:musiccu/common/widgets/now_playing_mini_bar.dart';
 import 'package:musiccu/common/widgets/select/select_screen.dart';
 import 'package:musiccu/common/widgets/select/selection_bar.dart';
@@ -77,23 +77,38 @@ class InsidePlaylist extends StatelessWidget {
                             Get.find<SelectionController<SongModel>>();
 
                         selectionController.clearSelection();
+                        selectionController.restoreDefaultView();
                         selectionController.toggleSelection(song.id);
 
                         Get.to(
                           () => SelectionScreen<SongModel>(
                             items: songs,
                             getId: (song) => song.id,
-                            buildTile: (song) => SongtileSimple(song: song),
+                            buildTile:
+                                (song) => SongtileSimple(
+                                  song: song,
+                                  heigt: 75,
+                                  width: 75,
+                                  heightBtwText: 2,
+                                  artistNameStyle: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontSize: 15),
+                                  songNameStyle: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium!
+                                      .copyWith(fontSize: 20),
+                                ),
                             selectionController: selectionController,
                             actions: [
                               SelectionAction(
                                 icon: Icons.playlist_add,
                                 label: 'Add to playlist',
-                                onPressed:
-                                    () =>
-                                        SelectionUI.showBulkAddToPlaylistSheet(
-                                          context,
-                                        ), // Empty handler
+                                onPressed: () {
+                                  SelectionUI.showBulkAddToPlaylistSheet(
+                                    context,
+                                  );
+                                }, // Empty handler
                               ),
                               SelectionAction(
                                 icon: Icons.queue_music,
@@ -109,18 +124,16 @@ class InsidePlaylist extends StatelessWidget {
                                 icon: Icons.delete,
                                 label: 'Delete',
                                 onPressed: () {
-
                                   selectionController.showReplacementView(
-                                    DeleteBottomBar(
+                                    BottomBarButton(
                                       context: context,
                                       onTap: () {
-                                        selectionController
-                                            .restoreDefaultView();
                                         SelectionUI.showDeleteDialog(
                                           context,
                                           playlist.name,
                                         );
                                       },
+                                      selectionController: selectionController,
                                     ),
                                   );
                                 },
@@ -131,6 +144,15 @@ class InsidePlaylist extends StatelessWidget {
                       },
                       child: SongtileSimple(
                         song: song,
+                        heigt: 75,
+                        width: 75,
+                        heightBtwText: 2,
+                        artistNameStyle: Theme.of(
+                          context,
+                        ).textTheme.titleLarge!.copyWith(fontSize: 15),
+                        songNameStyle: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium!.copyWith(fontSize: 20),
                         onTap: () {
                           SongController.instance.updateSelectedSong(
                             song,

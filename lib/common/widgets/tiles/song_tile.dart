@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:musiccu/common/widgets/container/deleteBottomBar.dart';
+import 'package:musiccu/common/widgets/container/bottomBarButton.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
 import 'package:musiccu/common/widgets/icons/pause_stop.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
@@ -97,7 +97,7 @@ class SongTile extends StatelessWidget {
                     label: 'Delete',
                     onPressed:
                         () { selectionController.showReplacementView(
-                          DeleteBottomBar(
+                          BottomBarButton<SongModel>(
                             context: context,
                             onTap: () {
                               // When delete is tapped:
@@ -105,6 +105,7 @@ class SongTile extends StatelessWidget {
                                 context,
                               ); // Then show dialog
                             },
+                            selectionController: selectionController,
                           ),
                         );
                     }

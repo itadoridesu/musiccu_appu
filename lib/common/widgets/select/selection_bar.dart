@@ -47,7 +47,7 @@ class SelectionActionBar<T> extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: actions.map((action) {
             final isActive = hasSelections || action.alwaysActive;
             return _buildActionButton(

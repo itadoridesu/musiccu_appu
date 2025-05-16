@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/utils.dart';
 import 'package:musiccu/common/widgets/images/rounded_images.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
+import 'package:musiccu/features/personlization/screens/update_playlist.dart/update_playlist.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 
 class PlaylistAttributes extends StatelessWidget {
@@ -41,8 +44,17 @@ class PlaylistAttributes extends StatelessWidget {
                     maxLines: 1, // Single line
                   ),
                 ),
-                const SizedBox(width: 8), // Consistent spacing
-                const Icon(Icons.edit_sharp, size: 20, color: AColors.artistTextColor),
+                if (playlist.id != 'predef_favorites' &&
+                  playlist.id != 'predef_recently_played' &&
+                  playlist.id != 'predef_recently_played') ...[
+                    const SizedBox(width: 8), // Consistent spacing
+                    IconButton(
+                    icon: const Icon(Icons.edit_sharp, size: 20, color: AColors.artistTextColor),
+                    onPressed: () {
+                     Get.to(UpdatePlaylistScreen(playlist: playlist));
+                    },
+                    ),
+                ],
               ],
             ),
           ),
@@ -56,3 +68,4 @@ class PlaylistAttributes extends StatelessWidget {
     );
   }
 }
+

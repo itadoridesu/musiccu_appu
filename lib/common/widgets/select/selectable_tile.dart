@@ -5,14 +5,18 @@ class SelectableTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onToggle;
   final Widget child;
-  final Color? color;
+  final Color color, selectionColor;
+  final double distance, padding;
 
   const SelectableTile({
     super.key,
     required this.isSelected,
     required this.onToggle,
     required this.child,
-    this.color,
+    required this.color,
+    required this.distance,
+    required this.selectionColor,
+    required this.padding
   });
 
   @override
@@ -26,9 +30,9 @@ class SelectableTile extends StatelessWidget {
         child: InkWell(
           onTap: onToggle,
           child: Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.blue.withOpacity(0.1) : color,
+              color: isSelected ? selectionColor : color,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -45,7 +49,7 @@ class SelectableTile extends StatelessWidget {
                     activeColor: Colors.blue,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: distance),
                 Expanded(child: child),
               ],
             ),

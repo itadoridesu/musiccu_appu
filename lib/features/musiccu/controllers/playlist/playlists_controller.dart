@@ -58,21 +58,6 @@ class PlaylistController extends GetxController {
     }
   }
 
-  // Add this to your PlaylistController class
-  Future<void> deleteAllPlaylists() async {
-    try {
-      await _playlistRepo.deleteAllPlaylists();
-      playlists.clear();
-      TLoaders.successSnackBar(title: "Yes", message: "playlists deleted");
-    } catch (e) {
-      TLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Failed to delete playlists: ${e.toString()}',
-      );
-      rethrow;
-    }
-  }
-
   // fetch songs for playlist
   void fetchSongsOfSelectedPlaylist() {
     try {
@@ -152,16 +137,18 @@ class PlaylistController extends GetxController {
     }
   }
 
-  /// add multiple songs to playlist
+  /// Add multiple songs to playlist
   Future<void> addSongsToPlaylist(
     String playlistId,
-    List<String> songIds,
-  ) async {
+    List<String> songIds, {
+    bool showSnackBar = true,
+    bool thorwUniqueSongs = true
+  }) async {
     try {
       isLoading(true);
 
       // Bulk add to repository
-      await _playlistRepo.addSongsToPlaylist(playlistId, songIds);
+      await _playlistRepo.addSongsToPlaylist(playlistId, songIds, show: thorwUniqueSongs);
 
       // Get updated playlist
       final updatedPlaylist = await _playlistRepo.getPlaylist(playlistId);
@@ -179,24 +166,99 @@ class PlaylistController extends GetxController {
           fetchSongsOfSelectedPlaylist();
         }
 
-        TLoaders.successSnackBar(
-          title: 'Success',
-          message: 'songs added to playlist successfully',
-        );
+        if (showSnackBar) {
+          TLoaders.successSnackBar(
+            title: 'Success',
+            message: 'Songs added to playlist successfully',
+          );
+        }
       }
     } catch (e) {
-      TLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Failed to add songs: ${e.toString()}',
-      );
+      if (showSnackBar) {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Failed to add songs: ${e.toString()}',
+        );
+      } else {
+        rethrow;
+      }
     } finally {
       isLoading(false);
     }
   }
 
+  // adding song to favotire 
+  Future<void> addSongToFavorites(String songId) async {
+  try {
+    await _playlistRepo.addSongToPlaylist("predef_favorites", songId);
+
+    final updatedFavorites = await _playlistRepo.getPlaylist("predef_favorites");
+    if (updatedFavorites == null) return;
+    
+    
+    // 3. Update current view if needed
+    if (selectedPlaylist.value?.id == "predef_favorites") {
+      selectedPlaylist.value = updatedFavorites;
+      fetchSongsOfSelectedPlaylist();
+    }
+    
+    playlists.refresh();
+  } catch (e) {
+    TLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Failed to add to favorites',
+    );
+    rethrow;
+  }
+}
+
+  // delete song from playlist (only for the favoriting)
+Future<void> removeSongFromFavorites(String songId) async {
+  try {
+    // 1. Update in repository
+    await _playlistRepo.removeSongFromPlaylist("predef_favorites", songId);
+    
+    // 2. Force refresh from repository
+    final updatedFavorites = await _playlistRepo.getPlaylist("predef_favorites");
+    if (updatedFavorites == null) return;
+    
+    
+    // 3. Update current view if needed
+    if (selectedPlaylist.value?.id == "predef_favorites") {
+      selectedPlaylist.value = updatedFavorites;
+      fetchSongsOfSelectedPlaylist();
+    }
+    
+    playlists.refresh();
+  } catch (e) {
+    TLoaders.errorSnackBar(
+      title: 'Error', 
+      message: 'Failed to remove from favorites'
+    );
+  }
+}
+  /// delete playlists
+  Future<void> deleteMultiplePlaylists(List<String> playlistIds) async {
+    if (playlistIds.isEmpty) return;
+
+    try {
+      await _playlistRepo.deleteMultiplePlaylists(playlistIds);
+      
+      playlists.removeWhere((playlist) => playlistIds.contains(playlist.id));
+
+      playlists.refresh();  
+      
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // delete songs from playlist
-  // In PlaylistController
-  Future<void> removeSelectedSongs(List<String> songIds, {bool usualCall = true}) async {
+  Future<void> removeSelectedSongs(
+    List<String> songIds, {
+    bool usualCall = true,
+    bool fromFavorites = false
+  }) async {
     try {
       final playlist = selectedPlaylist.value!; // Guaranteed to exist
       final updatedSongs =
@@ -206,21 +268,22 @@ class PlaylistController extends GetxController {
       await _playlistRepo.updatePlaylist(updated);
 
       // Update state
-      playlists[playlists.indexWhere((p) => p.id == playlist.id)] = updated;
+      if(!fromFavorites) playlists[playlists.indexWhere((p) => p.id == playlist.id)] = updated;
       selectedPlaylist.value = updated;
-      playlists.refresh();
       fetchSongsOfSelectedPlaylist();
 
-      if (usualCall) TLoaders.successSnackBar(
-        title: 'Songs removed',
-        message:
-            '${songIds.length} song${songIds.length > 1 ? 's' : ''} deleted',
-      );
+      if (usualCall)
+        TLoaders.successSnackBar(
+          title: 'Songs removed',
+          message:
+              '${songIds.length} song${songIds.length > 1 ? 's' : ''} deleted',
+        );
     } catch (e) {
-      if(usualCall) TLoaders.errorSnackBar(
-        title: 'Deletion failed',
-        message: 'Please try again',
-      );
+      if (usualCall)
+        TLoaders.errorSnackBar(
+          title: 'Deletion failed',
+          message: 'Please try again',
+        );
       rethrow;
     }
   }

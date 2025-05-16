@@ -4,6 +4,7 @@ import 'package:musiccu/common/widgets/tiles/playlist_tile_simple.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/selection_controller.dart';
+import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/constants/colors.dart';
 import 'package:musiccu/utils/helpers/helper_functions.dart';
@@ -93,7 +94,6 @@ class SelectionUI {
                                 ),
                                 title: const Text('Add New Playlist'),
                                 onTap: () {
-                                  Get.back();
                                   PlaylistController.instance
                                       .showCreatePlaylistDialog();
                                 },
@@ -155,8 +155,8 @@ class SelectionUI {
           TextButton(
             onPressed: () {
               selectionController.deleteSelectedSongsPlaylist(); // Perform deletion
-              Get.back(); 
-              Get.back();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: const Text(
               'Delete',
@@ -171,6 +171,48 @@ class SelectionUI {
       ),
     );
   }
+
+  static void showDeletePlaylistsDialog(BuildContext context) {
+  final selectionController = Get.find<SelectionController<PlaylistModel>>();
+  final dark = THelperFunctions.isDarkMode(context);
+  final backgroundColor = dark ? AColors.dark : AColors.pageTitleColor;
+  final count = selectionController.selectedIds.length;
+  final isSingle = count == 1;
+
+  Get.dialog(
+    AlertDialog(
+      backgroundColor: backgroundColor,
+      title: Text(
+        isSingle ? 'Delete Playlist' : 'Delete Playlists',
+        style: Theme.of(context).textTheme.headlineMedium,
+      ),
+      content: Text(
+        isSingle
+          ? 'This will permanently delete the selected playlist.'
+          : 'This will permanently delete $count playlists.',
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            // Just trigger the controller's deletion logic
+            selectionController.deleteSelectedPlaylists();
+            Get.back(); // Close dialog
+            Get.back(); // Close selection screen if needed
+          },
+          child: const Text(
+            'Delete',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   // NEW VERSION - for complete song deletion
   static void showCompleteDeletionDialog(BuildContext context) {
@@ -197,8 +239,8 @@ class SelectionUI {
           TextButton(
             onPressed: () {
               selectionController.deleteSelectedSongs();
-  Navigator.of(context).pop(); 
-  Navigator.of(context).pop(); 
+              Navigator.of(context).pop(); 
+              Navigator.of(context).pop(); 
             },
 
             child: const Text(
@@ -208,7 +250,7 @@ class SelectionUI {
           ),
         ],
       ),
-      barrierDismissible: false, // User must explicitly choose
+      barrierDismissible: false, 
     );
   }
 }
