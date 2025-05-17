@@ -42,6 +42,10 @@ class PlayListTile extends StatelessWidget {
       final firstSong = hasSongs ? playlistSongs[0] : null;
       final secondSong = playlistSongs.length > 1 ? playlistSongs[1] : null;
 
+      final coverImage = (playlist.coverImagePath != null && playlist.coverImagePath!.isNotEmpty)
+          ? playlist.coverImagePath!
+          : (firstSong?.imagePath ?? "");
+
       return GestureDetector(
         onLongPress:
             onLongPress ??
@@ -174,7 +178,7 @@ class PlayListTile extends StatelessWidget {
               children: [
                 // Image - Use first song's image or default
                 RoundedImage(
-                  imageUrl: playlist.coverImagePath ?? firstSong?.imagePath ?? "",
+                  imageUrl: coverImage,
                   height: 100,
                   width: 100,
                   applyImageRadius: true,

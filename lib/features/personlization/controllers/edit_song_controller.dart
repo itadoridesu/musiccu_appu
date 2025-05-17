@@ -45,7 +45,8 @@ class EditSongController extends GetxController {
       final isModified =
           trimmedName != originalSong.songName ||
           trimmedArtist != originalSong.artistName ||
-          trimmedAlbum != originalSong.albumName;
+          trimmedAlbum != originalSong.albumName ||
+          newImagePath.value != originalSong.imagePath;
 
       if (!isModified) {
         TLoaders.customToast(message: 'No modifications were made');

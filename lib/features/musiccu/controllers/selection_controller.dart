@@ -95,7 +95,6 @@ class SelectionController<T> extends GetxController {
   }
 
   /// deleting playlists
-  // In SelectionController<PlaylistModel>
   Future<void> deleteSelectedPlaylists() async {
     if (selectedIds.isEmpty) return;
 

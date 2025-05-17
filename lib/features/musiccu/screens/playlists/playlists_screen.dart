@@ -5,11 +5,8 @@ import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/now_playing_mini_bar.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
-import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/screens/playlists/widgets/add_new.dart';
 import 'package:musiccu/features/musiccu/screens/playlists/widgets/playlist_tile.dart';
-import 'package:musiccu/utils/constants/colors.dart';
-import 'package:musiccu/utils/helpers/helper_functions.dart';
 
 class PlaylistsScreen extends StatelessWidget {
   const PlaylistsScreen({super.key});
@@ -21,8 +18,8 @@ class PlaylistsScreen extends StatelessWidget {
             ? PlaylistController.instance
             : Get.put(PlaylistController());
 
-    final dark = THelperFunctions.isDarkMode(context);
-    final backgroundColor = dark ? AColors.dark : AColors.pageTitleColor;
+    playlistController.selectedPlaylist.value = null;
+    playlistController.playlistSongs.value = null;
 
     return Scaffold(
       appBar: AAppBar(

@@ -42,7 +42,7 @@ class SelectionScreen<T> extends StatelessWidget {
       onPopInvoked: (didPop) async {
         if (!didPop) {
           if (onGetBack != null) {
-            onGetBack!(); 
+            onGetBack!();
           } else if (selectionController.replacementView.value == null) {
             selectionController.clearSelection();
             Get.back();
@@ -63,8 +63,12 @@ class SelectionScreen<T> extends StatelessWidget {
           leading: GestureDetector(
             onTap: () {
               selectionController.restoreDefaultView();
-              selectionController.clearSelection();
-              Get.back();
+              if (onGetBack != null)
+                onGetBack!();
+              else {
+                selectionController.clearSelection();
+                Get.back();
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 10),
