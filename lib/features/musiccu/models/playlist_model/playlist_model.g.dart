@@ -23,13 +23,14 @@ class PlaylistModelAdapter extends TypeAdapter<PlaylistModel> {
       createdAt: fields[3] as DateTime?,
       updatedAt: fields[4] as DateTime?,
       coverImagePath: fields[5] as String?,
+      isCoverManuallySet: fields[6] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, PlaylistModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class PlaylistModelAdapter extends TypeAdapter<PlaylistModel> {
       ..writeByte(4)
       ..write(obj.updatedAt)
       ..writeByte(5)
-      ..write(obj.coverImagePath);
+      ..write(obj.coverImagePath)
+      ..writeByte(6)
+      ..write(obj.isCoverManuallySet);
   }
 
   @override

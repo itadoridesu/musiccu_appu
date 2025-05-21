@@ -196,6 +196,8 @@ class SongController extends GetxController {
     selectedSong.value = song;
 
     _predefinedPlaylistsController.addToRecentlyPlayed(song.id);
+    _predefinedPlaylistsController.incrementPlayCount(song);
+
 
     if (context != null) {
       // Get the route where we're selecting from

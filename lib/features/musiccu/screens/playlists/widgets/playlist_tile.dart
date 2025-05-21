@@ -42,7 +42,7 @@ class PlayListTile extends StatelessWidget {
       final firstSong = hasSongs ? playlistSongs[0] : null;
       final secondSong = playlistSongs.length > 1 ? playlistSongs[1] : null;
 
-      final coverImage = (playlist.coverImagePath != null && playlist.coverImagePath!.isNotEmpty)
+      final coverImage = (playlist.isCoverManuallySet && playlist.coverImagePath != null)
           ? playlist.coverImagePath!
           : (firstSong?.imagePath ?? "");
 

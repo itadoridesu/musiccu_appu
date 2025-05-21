@@ -7,6 +7,7 @@ import 'package:musiccu/common/widgets/container/bottomBarButton.dart';
 import 'package:musiccu/common/widgets/select/select_screen.dart';
 import 'package:musiccu/common/widgets/tiles/songtile_simple.dart';
 import 'package:musiccu/data/repositories/playlists_repository.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/selection_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
@@ -72,8 +73,11 @@ class PlaylistController extends GetxController {
       if (playlist == null) return;
 
       // Filter all songs to find the ones that match IDs in the playlist
-      playlistSongs.value =
-          songs.where((song) => playlist.songIds.contains(song.id)).toList();
+      playlistSongs.value =songs.where((song) => playlist.songIds.contains(song.id)).toList();
+
+      if (playlist.id == PredefinedPlaylistsController.mostPlayedId) {
+      songs.sort((a, b) => b.playCount.compareTo(a.playCount));
+    }
 
       playlistSongs.refresh();
     } catch (e) {
@@ -171,6 +175,7 @@ class PlaylistController extends GetxController {
         // If currently viewing this playlist, refresh its songs
         if (selectedPlaylist.value?.id == playlistId) {
           selectedPlaylist.value = updatedPlaylist;
+          if(selectedPlaylist.value!.id == "predef_favorites") PredefinedPlaylistsController.instance.favorites.value = updatedPlaylist;
           fetchSongsOfSelectedPlaylist();
         }
 
@@ -245,6 +250,7 @@ Future<void> removeSongFromFavorites(String songId) async {
     );
   }
 }
+
   /// delete playlists
   Future<void> deleteMultiplePlaylists(List<String> playlistIds) async {
     if (playlistIds.isEmpty) return;
@@ -329,6 +335,7 @@ Future<void> removeSongFromFavorites(String songId) async {
         name: newName ?? selectedPlaylist.value!.name,
         coverImagePath: newCoverImagePath ?? selectedPlaylist.value!.coverImagePath,
         updatedAt: DateTime.now(),
+        isCoverManuallySet: true
       );
 
       await _playlistRepo.updatePlaylist(updatedPlaylist);
@@ -354,9 +361,10 @@ Future<void> removeSongFromFavorites(String songId) async {
 
   void updatePlaylist(PlaylistModel playlist, String? firstSongImage ,{bool navigate = false}) {
     selectedPlaylist.value = playlist;
-    if(playlist.coverImagePath == null || playlist.coverImagePath == "") selectedPlaylist.value!.coverImagePath = firstSongImage;
+    if(!playlist.isCoverManuallySet) selectedPlaylist.value!.coverImagePath = firstSongImage;
     shouldNavigateToPlaylist.value = navigate;
   }
+
 
   /// UI
   void showCreatePlaylistDialog() {
@@ -456,10 +464,12 @@ Future<void> removeSongFromFavorites(String songId) async {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Add songs option
+              // Only show "Add Songs" if not a predef_recently_played or predef_most_played playlist
+              if (selectedPlaylist.value?.id != 'predef_recently_played' &&
+                selectedPlaylist.value?.id != 'predef_most_played')
               _buildCompactOption(
                 context,
                 icon: Icons.add,
@@ -467,28 +477,31 @@ Future<void> removeSongFromFavorites(String songId) async {
                 color: textColor,
                 onTap: () {
                 _handleAddSongs(selectionController, context);
-              },
+                },
                 radius: 12,
               ),
 
-              // Manage playlist option (with different icon)
+              // Manage playlist option (always shown)
               _buildCompactOption(
-                context,
-                icon: Icons.playlist_add_check,
-                title: 'Manage Playlist',
-                color: textColor,
-                onTap: () => Navigator.pop(context),
-                radius: 0,
+              context,
+              icon: Icons.playlist_add_check,
+              title: 'Manage Playlist',
+              color: textColor,
+              onTap: () => Navigator.pop(context),
+              radius: 0,
               ),
 
-              // Delete option
+              // Only show "Delete Playlist" if not a predef playlist
+              if (selectedPlaylist.value?.id != 'predef_favorites' &&
+                selectedPlaylist.value?.id != 'predef_recently_played' &&
+                selectedPlaylist.value?.id != 'predef_most_played')
               _buildCompactOption(
                 context,
                 icon: Icons.delete_outline,
                 title: 'Delete Playlist',
                 color: Colors.redAccent,
                 onTap: () {
-                  _handleDeletePlaylist(selectionController, context);
+                _handleDeletePlaylist(selectionController, context);
                 },
                 radius: 12,
               ),

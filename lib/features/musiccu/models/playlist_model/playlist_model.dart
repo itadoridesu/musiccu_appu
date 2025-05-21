@@ -22,6 +22,9 @@ class PlaylistModel {
   @HiveField(5)
   String? coverImagePath;
 
+  @HiveField(6)  // New field
+  bool isCoverManuallySet;
+
   PlaylistModel({
     required this.id,
     required this.name,
@@ -29,6 +32,7 @@ class PlaylistModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.coverImagePath,
+    this.isCoverManuallySet = false,  
   }) : songIds = songIds ?? [],
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
@@ -40,6 +44,7 @@ class PlaylistModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? coverImagePath,
+    bool? isCoverManuallySet,  // Added parameter
   }) {
     return PlaylistModel(
       id: id ?? this.id,
@@ -48,6 +53,7 @@ class PlaylistModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       coverImagePath: coverImagePath ?? this.coverImagePath,
+      isCoverManuallySet: isCoverManuallySet ?? this.isCoverManuallySet,  // Added
     );
   }
 
@@ -70,6 +76,7 @@ class PlaylistModel {
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
     'coverImagePath': coverImagePath,
+    'isCoverManuallySet': isCoverManuallySet,  // Added
   };
 
   factory PlaylistModel.fromJson(Map<String, dynamic> json) => PlaylistModel(
@@ -79,8 +86,12 @@ class PlaylistModel {
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
     coverImagePath: json['coverImagePath'],
+    isCoverManuallySet: json['isCoverManuallySet'] ?? false,  // Added
   );
 
-  static PlaylistModel empty() =>
-      PlaylistModel(id: '', name: 'Untitled Playlist');
+  static PlaylistModel empty() => PlaylistModel(
+    id: '', 
+    name: 'Untitled Playlist',
+    isCoverManuallySet: false,  // Added
+  );
 }

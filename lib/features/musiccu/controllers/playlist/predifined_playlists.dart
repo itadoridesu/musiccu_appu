@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/data/repositories/playlists_repository.dart';
+import 'package:musiccu/data/repositories/songs_repository.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/popups/loader.dart';
 
 class PredefinedPlaylistsController extends GetxController {
@@ -97,12 +98,12 @@ class PredefinedPlaylistsController extends GetxController {
           }
         }
       } else {
-          if (isAlreadyFavorite) {
-            newSongIds.remove(songId);
-          } else {
-            newSongIds.add(songId);
-          }
+        if (isAlreadyFavorite) {
+          newSongIds.remove(songId);
+        } else {
+          newSongIds.add(songId);
         }
+      }
     }
     // For forced additions (like from song menu)
     else if (!isAlreadyFavorite) {
@@ -191,22 +192,7 @@ class PredefinedPlaylistsController extends GetxController {
     }
   }
 
-  // Recently Played methods
-  Future<void> addToRecentlyPlayed(String songId) async {
-    final newSongIds =
-        List<String>.from(recentlyPlayed.value.songIds)
-          ..remove(songId)
-          ..insert(0, songId);
-
-    if (newSongIds.length > 50) {
-      newSongIds.removeRange(50, newSongIds.length);
-    }
-
-    final updated = recentlyPlayed.value.copyWith(songIds: newSongIds);
-    await _playlistRepo.updatePlaylist(updated);
-    recentlyPlayed.value = updated;
-  }
-
+  // called when deleting songs from the main list
   Future<void> removeFromPredefinedPlaylists(List<String> songIds) async {
     if (songIds.isEmpty) return;
 
@@ -229,5 +215,48 @@ class PredefinedPlaylistsController extends GetxController {
     final updated = playlist.value.copyWith(songIds: newSongIds);
     await _playlistRepo.updatePlaylist(updated);
     playlist.value = updated;
+  }
+
+  // Recently Played methods
+  Future<void> addToRecentlyPlayed(String songId) async {
+    final newSongIds =
+        List<String>.from(recentlyPlayed.value.songIds)
+          ..remove(songId)
+          ..insert(0, songId);
+
+    if (newSongIds.length > 50) {
+      newSongIds.removeRange(50, newSongIds.length);
+    }
+
+    final updated = recentlyPlayed.value.copyWith(songIds: newSongIds);
+    await _playlistRepo.updatePlaylist(updated);
+    recentlyPlayed.value = updated;
+  }
+
+  // logic for most played
+  Future<void> incrementPlayCount(SongModel? song) async {
+    if (song == null) return;
+    // Directly use the passed song object
+    final updatedSong = song.copyWith(playCount: song.playCount + 1);
+
+    // Single repository call
+    await SongRepository.instance.updateSong(updatedSong);
+
+    // Add to Most Played if not present
+    if (!mostPlayed.value.songIds.contains(song.id)) {
+      mostPlayed.value = mostPlayed.value.copyWith(
+        songIds: [...mostPlayed.value.songIds, song.id],
+      );
+      await _playlistRepo.updatePlaylist(mostPlayed.value);
+    }
+
+    if (Get.isRegistered<PlaylistController>()) {
+      final playlistController = PlaylistController.instance;
+
+      // THEN check if viewing favorites
+      if (playlistController.selectedPlaylist.value?.id == mostPlayedId) {
+        playlistController.fetchSongsOfSelectedPlaylist();
+      }
+    }
   }
 }

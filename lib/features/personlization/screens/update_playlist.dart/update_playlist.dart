@@ -44,24 +44,25 @@ class UpdatePlaylistScreen extends StatelessWidget {
                 TextFormField(
                   controller: controller.playlistName,
                   validator: (value) => TValidator.validateEmptyText('Playlist Name', value),
+                  enabled: playlist.id != 'predef_favorites',
                   decoration: InputDecoration(
-                    errorStyle: TextStyle(color: Colors.red[700]),
-                    border: const UnderlineInputBorder(),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue.withOpacity(0.4),
-                        width: 2.0,
-                      ),
+                  errorStyle: TextStyle(color: Colors.red[700]),
+                  border: const UnderlineInputBorder(),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                    color: Colors.blue.withOpacity(0.4),
+                    width: 2.0,
                     ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                    ),
-                    errorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2.0),
-                    ),
-                    focusedErrorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2.0),
-                    ),
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  ),
+                  errorBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red, width: 2.0),
+                  ),
+                  focusedErrorBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red, width: 2.0),
+                  ),
                   ),
                 ),
                 const SizedBox(height: 30),

@@ -16,6 +16,7 @@ class SongtileSimple extends StatelessWidget {
     this.heightBtwText = 0,
     this.movingText = false,
     this.showHero = false,
+    this.isMostPlayed = false,
   });
 
   final SongModel song;
@@ -25,6 +26,7 @@ class SongtileSimple extends StatelessWidget {
   final TextStyle? artistNameStyle;
   final bool movingText;
   final bool showHero;
+  final bool isMostPlayed;
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +67,12 @@ class SongtileSimple extends StatelessWidget {
                     maxLines: 1,
                   ) : MovingText(text: song.songName, width: 200),
                   SizedBox(height: heightBtwText,),
-                  Text(
+                  !isMostPlayed ? Text(
                     song.artistName,
+                    style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ) : Text("played " + song.playCount.toString() + " times",
                     style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,

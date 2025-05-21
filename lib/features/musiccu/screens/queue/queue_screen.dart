@@ -5,6 +5,7 @@ import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
 import 'package:musiccu/common/widgets/tiles/songtile_simple.dart';
 import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
 import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
@@ -123,6 +124,8 @@ class QueueScreen extends StatelessWidget {
                           ).textTheme.titleLarge!.copyWith(fontSize: 15),
                           onTap: () {
                             queueController.jumpToIndex(index);
+                            PredefinedPlaylistsController.instance.addToRecentlyPlayed(queue[index].id);
+
                           },
                         ),
                       );

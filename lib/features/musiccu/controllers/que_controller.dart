@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 
@@ -15,6 +16,8 @@ class QueueController extends GetxController {
   RxBool isShuffled = false.obs;
 
   final songController = SongController.instance;
+
+  late final predefinedPlaylistsController = PredefinedPlaylistsController.instance;
 
   // Add this to your QueueController class
 
@@ -146,12 +149,20 @@ class QueueController extends GetxController {
         // Restart current song immediately
         await audio.audioPlayer.seek(Duration.zero);
         await audio.audioPlayer.play();
+        predefinedPlaylistsController.incrementPlayCount(currentSong);
+
         break;
 
       case RepeatMode.all:
         // Move to next song (with wrap-around)
         currentIndex.value = (currentIndex.value + 1) % queue.length;
         songController.selectedSong.value = currentSong;
+
+        // for most and recently played
+        predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
+        predefinedPlaylistsController.incrementPlayCount(currentSong);
+
+
         break;
 
       case RepeatMode.off:
@@ -159,6 +170,10 @@ class QueueController extends GetxController {
           // Move to next song
           currentIndex.value++;
           songController.selectedSong.value = currentSong;
+
+          // for most and recently played
+          predefinedPlaylistsController.incrementPlayCount(currentSong);
+          predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
         } else {
           // Stop at queue end
           await audio.audioPlayer.stop();
@@ -175,43 +190,50 @@ class QueueController extends GetxController {
   }
 
   // Replace JUST these two methods:
- SongModel? moveNext() {
-  if (queue.isEmpty) return null;
+  SongModel? moveNext() {
+    if (queue.isEmpty) return null;
 
-  // Always move to next index, regardless of repeat mode
-  if (currentIndex.value < queue.length - 1) {
-    currentIndex.value++;
-  } else {
-    // At end of queue - behavior depends on repeat mode
-    if (repeatMode.value == RepeatMode.all) {
-      currentIndex.value = 0; // Wrap around
+    // Always move to next index, regardless of repeat mode
+    if (currentIndex.value < queue.length - 1) {
+      currentIndex.value++;
+
+      // for most and recently played
+      predefinedPlaylistsController.incrementPlayCount(currentSong);
+      predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
     } else {
-      return null; // No more songs
+      // At end of queue - behavior depends on repeat mode
+      if (repeatMode.value == RepeatMode.all) {
+        currentIndex.value = 0; // Wrap around
+
+        // for most and recently played
+        predefinedPlaylistsController.incrementPlayCount(currentSong);
+        predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
+      }
     }
+
+    songController.selectedSong.value = currentSong;
+    return currentSong;
   }
 
-  songController.selectedSong.value = currentSong;
-  return currentSong;
-}
+  SongModel? movePrevious() {
+    if (queue.isEmpty) return null;
 
-SongModel? movePrevious() {
-  if (queue.isEmpty) return null;
-
-  // Always move to previous index if possible
-  if (currentIndex.value > 0) {
-    currentIndex.value--;
-  } else {
-    // At start of queue - behavior depends on repeat mode
-    if (repeatMode.value == RepeatMode.all) {
-      currentIndex.value = queue.length - 1; // Wrap around
+    // Always move to previous index if possible
+    if (currentIndex.value > 0) {
+      currentIndex.value--;
+      predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
     } else {
-      return null; // No previous songs
+      // At start of queue - behavior depends on repeat mode
+      if (repeatMode.value == RepeatMode.all) {
+        currentIndex.value = queue.length - 1; // Wrap around
+        predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
+      }
     }
+
+    songController.selectedSong.value = currentSong;
+    return currentSong;
   }
 
-  songController.selectedSong.value = currentSong;
-  return currentSong;
-}
   /// Jumps to specific index in queue
   void jumpToIndex(int index) {
     if (index >= 0 && index < queue.length) {

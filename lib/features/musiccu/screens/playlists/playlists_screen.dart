@@ -69,7 +69,7 @@ class PlaylistsScreen extends StatelessWidget {
               indent: 25,
             ),
 
-            const SizedBox(height: 7),
+            const SizedBox(height: 9),
 
             // Most Played playlist tile (unfilled icon, adjusted color)
             Obx(() {
