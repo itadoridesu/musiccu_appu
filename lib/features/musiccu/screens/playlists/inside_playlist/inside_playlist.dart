@@ -38,155 +38,163 @@ class InsidePlaylist extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
-            children: [
-              const SizedBox(height: 10),
-              PlaylistAttributes(),
-              const SizedBox(height: 15),
-              Obx(() {
-                final songs = controller.playlistSongs.value;
+          children: [
+            const SizedBox(height: 10),
+            Obx(() {
+              final songs = controller.playlistSongs.value;
 
-               
-              if (songs != null && !songs.isEmpty) PlayShuffle();
-              const SizedBox(height: 7);
+              return Column(
+                children: [
+                   PlaylistAttributes(),
+            const SizedBox(height: 15),
+                  if (songs != null && songs.isNotEmpty) PlayShuffle(),
+                  const SizedBox(height: 7),
 
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: songs!.length,
-                itemBuilder: (_, index) {
-                  final song = songs[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                      left: 24,
-                      right: 24,
-                      top: 16,
-                    ),
-                    child: GestureDetector(
-                      onLongPress: () {
-                        if (controller.selectedPlaylist.value!.id !=
-                                "predef_recently_played" &&
-                            controller.selectedPlaylist.value!.id !=
-                                "predef_most_played") {
-                          if (!Get.isRegistered<
-                            SelectionController<SongModel>
-                          >()) {
-                            Get.put(SelectionController<SongModel>());
-                          }
-                          final selectionController =
-                              Get.find<SelectionController<SongModel>>();
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: songs!.length,
+                    itemBuilder: (_, index) {
+                      final song = songs[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                          left: 24,
+                          right: 24,
+                          top: 16,
+                        ),
+                        child: GestureDetector(
+                          onLongPress: () {
+                            if (controller.selectedPlaylist.value!.id !=
+                                    "predef_recently_played" &&
+                                controller.selectedPlaylist.value!.id !=
+                                    "predef_most_played") {
+                              if (!Get.isRegistered<
+                                SelectionController<SongModel>
+                              >()) {
+                                Get.put(SelectionController<SongModel>());
+                              }
+                              final selectionController =
+                                  Get.find<SelectionController<SongModel>>();
 
-                          selectionController.clearSelection();
-                          selectionController.restoreDefaultView();
-                          selectionController.toggleSelection(song.id);
+                              selectionController.clearSelection();
+                              selectionController.restoreDefaultView();
+                              selectionController.toggleSelection(song.id);
 
-                          Get.to(
-                            () => SelectionScreen<SongModel>(
-                              items: songs,
-                              getId: (song) => song.id,
-                              buildTile:
-                                  (song) => SongtileSimple(
-                                    song: song,
-                                    heigt: 75,
-                                    width: 75,
-                                    heightBtwText: 2,
-                                    artistNameStyle: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge!
-                                        .copyWith(fontSize: 15),
-                                    songNameStyle: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium!
-                                        .copyWith(fontSize: 20),
-                                  ),
-                              selectionController: selectionController,
-                              actions: [
-                                SelectionAction(
-                                  icon: Icons.playlist_add,
-                                  label: 'Add to playlist',
-                                  onPressed: () {
-                                    SelectionUI.showBulkAddToPlaylistSheet(
-                                      context,
-                                    );
-                                  }, // Empty handler
-                                ),
-                                SelectionAction(
-                                  icon: Icons.queue_music,
-                                  label: 'Up next',
-                                  onPressed: () {}, // Empty handler
-                                ),
-                                SelectionAction(
-                                  icon: Icons.share,
-                                  label: 'Share',
-                                  onPressed: () {}, // Empty handler
-                                ),
-                                SelectionAction(
-                                  icon: Icons.delete,
-                                  label: 'Delete',
-                                  onPressed: () {
-                                    selectionController.showReplacementView(
-                                      BottomBarButton(
-                                        context: context,
-                                        onTap: () {
-                                          SelectionUI.showDeleteDialog(
-                                            context,
-                                            controller
-                                                .selectedPlaylist
-                                                .value!
-                                                .name,
-                                          );
-                                        },
-                                        selectionController:
-                                            selectionController,
+                              Get.to(
+                                () => SelectionScreen<SongModel>(
+                                  items: songs,
+                                  getId: (song) => song.id,
+                                  buildTile:
+                                      (song) => SongtileSimple(
+                                        song: song,
+                                        heigt: 75,
+                                        width: 75,
+                                        heightBtwText: 2,
+                                        artistNameStyle: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge!
+                                            .copyWith(fontSize: 15),
+                                        songNameStyle: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(fontSize: 20),
                                       ),
-                                    );
-                                  },
+                                  selectionController: selectionController,
+                                  actions: [
+                                    SelectionAction(
+                                      icon: Icons.playlist_add,
+                                      label: 'Add to playlist',
+                                      onPressed: () {
+                                        SelectionUI.showBulkAddToPlaylistSheet(
+                                          context,
+                                        );
+                                      }, // Empty handler
+                                    ),
+                                    SelectionAction(
+                                      icon: Icons.queue_music,
+                                      label: 'Up next',
+                                      onPressed: () {}, // Empty handler
+                                    ),
+                                    SelectionAction(
+                                      icon: Icons.share,
+                                      label: 'Share',
+                                      onPressed: () {}, // Empty handler
+                                    ),
+                                    SelectionAction(
+                                      icon: Icons.delete,
+                                      label: 'Delete',
+                                      onPressed: () {
+                                        selectionController.showReplacementView(
+                                          BottomBarButton(
+                                            context: context,
+                                            onTap: () {
+                                              SelectionUI.showDeleteDialog(
+                                                context,
+                                                controller
+                                                    .selectedPlaylist
+                                                    .value!
+                                                    .name,
+                                              );
+                                            },
+                                            selectionController:
+                                                selectionController,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
-                      child: SongtileSimple(
-                        song: song,
-                        heigt: 75,
-                        width: 75,
-                        heightBtwText: 2,
-                        isMostPlayed: controller.selectedPlaylist.value!.id == "predef_most_played",
-                        artistNameStyle: Theme.of(
-                          context,
-                        ).textTheme.titleLarge!.copyWith(fontSize: 15),
-                        songNameStyle: Theme.of(
-                          context,
-                        ).textTheme.headlineMedium!.copyWith(fontSize: 20),
-                        onTap: () {
-                          SongController.instance.updateSelectedSong(
-                            song,
-                            navigate: true,
-                            context: context,
-                          );
+                              );
+                            }
+                          },
+                          child: SongtileSimple(
+                            song: song,
+                            heigt: 75,
+                            width: 75,
+                            heightBtwText: 2,
+                            isMostPlayed:
+                                controller.selectedPlaylist.value!.id ==
+                                "predef_most_played",
+                            artistNameStyle: Theme.of(
+                              context,
+                            ).textTheme.titleLarge!.copyWith(fontSize: 15),
+                            songNameStyle: Theme.of(
+                              context,
+                            ).textTheme.headlineMedium!.copyWith(fontSize: 20),
+                            onTap: () {
+                              SongController.instance.updateSelectedSong(
+                                song,
+                                navigate: true,
+                                context: context,
+                              );
 
-                          QueueController.instance.setQueue(
-                            songs,
-                            startingIndex: index,
-                          );
+                              QueueController.instance.setQueue(
+                                songs,
+                                startingIndex: index,
+                              );
 
-                          // for recently and most played 
+                              // for recently and most played
 
-                          PredefinedPlaylistsController.instance.incrementPlayCount(song);
+                              PredefinedPlaylistsController.instance
+                                  .incrementPlayCount(song);
 
-                          PredefinedPlaylistsController.instance
-                              .addToRecentlyPlayed(song.id);
-                        },
-                      ),
-                    ),
-                  );
-                },
-              );}),
+                              PredefinedPlaylistsController.instance
+                                  .addToRecentlyPlayed(song.id);
 
-              const SizedBox(height: 15),
-            ],
-          ),
+                               
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            }),
 
+            const SizedBox(height: 15),
+          ],
+        ),
       ),
       bottomNavigationBar: NowPlayingMiniBar(),
     );

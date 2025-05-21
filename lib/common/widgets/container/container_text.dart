@@ -28,29 +28,34 @@ class ContainerText extends StatelessWidget {
         ? AColors.darkGray2
         : AColors.pageTitleColor;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: color ?? defaultColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium!
-                  .copyWith(fontWeight: FontWeight.bold, color: Colors.blueAccent, fontSize: 21),
-            ),
-          ],
+    return Material(
+       color: Colors.transparent,
+        borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias, // required for ripple to clip to radius
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: color ?? defaultColor,
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              icon,
+              const SizedBox(width: 6),
+              Text(
+                text,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(fontWeight: FontWeight.bold, color: Colors.blueAccent, fontSize: 20),
+              ),
+            ],
+          ),
         ),
       ),
     );

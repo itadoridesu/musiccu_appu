@@ -66,20 +66,65 @@ class PlaylistController extends GetxController {
     }
   }
 
+  // special function only called when we are inside the recently played playlist
+  // this is called when we move a song in the recently played playlist
+  // it updates the order of the songs in the playlist
+  // and also updates the order of the songs in the UI
+  // it also updates the cover image of the playlist
+  void handleRecentlyPlayedUpdate(String movedSongId) {
+    final predefinedController = PredefinedPlaylistsController.instance;
+
+    // 1. Get the updated song order
+    final newSongIds = List<String>.from(
+      predefinedController.recentlyPlayed.value.songIds,
+    );
+
+    playlistSongs.value =
+        newSongIds.map((id) => songs.firstWhere((s) => s.id == id)).toList();
+
+    // 3. Update the playlist model
+    final updatedPlaylist = predefinedController.recentlyPlayed.value.copyWith(
+      songIds: newSongIds,
+      coverImagePath:
+          playlistSongs.value?.first.imagePath, // Use the first song's image
+    );
+
+    // 4. Update all reactive values
+    selectedPlaylist.value = updatedPlaylist;
+    predefinedController.recentlyPlayed.value = updatedPlaylist;
+  }
+
+
+  // mpst played 
+  void handleMostPlayedUpdate(String songId) {
+  final songs = SongController.instance.songs;
+  final song = songs.firstWhereOrNull((s) => s.id == songId);
+  if (song != null) {
+    playlistSongs.value = [
+      ...songs.where((s) => PredefinedPlaylistsController.instance.mostPlayed.value.songIds.contains(s.id))
+    ];
+  }
+}
+
+
   // fetch songs for playlist
   void fetchSongsOfSelectedPlaylist() {
     try {
       final playlist = selectedPlaylist.value;
       if (playlist == null) return;
 
-      // Filter all songs to find the ones that match IDs in the playlist
-      playlistSongs.value =songs.where((song) => playlist.songIds.contains(song.id)).toList();
+    final matchedSongs = playlist.songIds
+        .map((id) => songs.firstWhere((song) => song.id == id))
+        .toList();
 
-      if (playlist.id == PredefinedPlaylistsController.mostPlayedId) {
-      songs.sort((a, b) => b.playCount.compareTo(a.playCount));
+    // If this is the "Most Played" playlist, sort by play count descending
+    if (playlist.id == "predef_most_played") {
+      matchedSongs.sort((a, b) => b.playCount.compareTo(a.playCount));
     }
 
-      playlistSongs.refresh();
+    playlistSongs.value = matchedSongs;
+    playlistSongs.refresh();
+    
     } catch (e) {
       TLoaders.errorSnackBar(
         title: 'Error',
@@ -153,13 +198,17 @@ class PlaylistController extends GetxController {
     String playlistId,
     List<String> songIds, {
     bool showSnackBar = true,
-    bool thorwUniqueSongs = true
+    bool thorwUniqueSongs = true,
   }) async {
     try {
       isLoading(true);
 
       // Bulk add to repository
-      await _playlistRepo.addSongsToPlaylist(playlistId, songIds, show: thorwUniqueSongs);
+      await _playlistRepo.addSongsToPlaylist(
+        playlistId,
+        songIds,
+        show: thorwUniqueSongs,
+      );
 
       // Get updated playlist
       final updatedPlaylist = await _playlistRepo.getPlaylist(playlistId);
@@ -175,7 +224,9 @@ class PlaylistController extends GetxController {
         // If currently viewing this playlist, refresh its songs
         if (selectedPlaylist.value?.id == playlistId) {
           selectedPlaylist.value = updatedPlaylist;
-          if(selectedPlaylist.value!.id == "predef_favorites") PredefinedPlaylistsController.instance.favorites.value = updatedPlaylist;
+          if (selectedPlaylist.value!.id == "predef_favorites")
+            PredefinedPlaylistsController.instance.favorites.value =
+                updatedPlaylist;
           fetchSongsOfSelectedPlaylist();
         }
 
@@ -200,56 +251,58 @@ class PlaylistController extends GetxController {
     }
   }
 
-  // adding song to favotire 
+  // adding song to favotire
   Future<void> addSongToFavorites(String songId) async {
-  try {
-    await _playlistRepo.addSongToPlaylist("predef_favorites", songId);
+    try {
+      await _playlistRepo.addSongToPlaylist("predef_favorites", songId);
 
-    final updatedFavorites = await _playlistRepo.getPlaylist("predef_favorites");
-    if (updatedFavorites == null) return;
-    
-    
-    // 3. Update current view if needed
-    if (selectedPlaylist.value?.id == "predef_favorites") {
-      selectedPlaylist.value = updatedFavorites;
-      fetchSongsOfSelectedPlaylist();
+      final updatedFavorites = await _playlistRepo.getPlaylist(
+        "predef_favorites",
+      );
+      if (updatedFavorites == null) return;
+
+      // 3. Update current view if needed
+      if (selectedPlaylist.value?.id == "predef_favorites") {
+        selectedPlaylist.value = updatedFavorites;
+        fetchSongsOfSelectedPlaylist();
+      }
+
+      playlists.refresh();
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to add to favorites',
+      );
+      rethrow;
     }
-    
-    playlists.refresh();
-  } catch (e) {
-    TLoaders.errorSnackBar(
-      title: 'Error',
-      message: 'Failed to add to favorites',
-    );
-    rethrow;
   }
-}
 
   // delete song from playlist (only for the favoriting)
-Future<void> removeSongFromFavorites(String songId) async {
-  try {
-    // 1. Update in repository
-    await _playlistRepo.removeSongFromPlaylist("predef_favorites", songId);
-    
-    // 2. Force refresh from repository
-    final updatedFavorites = await _playlistRepo.getPlaylist("predef_favorites");
-    if (updatedFavorites == null) return;
-    
-    
-    // 3. Update current view if needed
-    if (selectedPlaylist.value?.id == "predef_favorites") {
-      selectedPlaylist.value = updatedFavorites;
-      fetchSongsOfSelectedPlaylist();
+  Future<void> removeSongFromFavorites(String songId) async {
+    try {
+      // 1. Update in repository
+      await _playlistRepo.removeSongFromPlaylist("predef_favorites", songId);
+
+      // 2. Force refresh from repository
+      final updatedFavorites = await _playlistRepo.getPlaylist(
+        "predef_favorites",
+      );
+      if (updatedFavorites == null) return;
+
+      // 3. Update current view if needed
+      if (selectedPlaylist.value?.id == "predef_favorites") {
+        selectedPlaylist.value = updatedFavorites;
+        fetchSongsOfSelectedPlaylist();
+      }
+
+      playlists.refresh();
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to remove from favorites',
+      );
     }
-    
-    playlists.refresh();
-  } catch (e) {
-    TLoaders.errorSnackBar(
-      title: 'Error', 
-      message: 'Failed to remove from favorites'
-    );
   }
-}
 
   /// delete playlists
   Future<void> deleteMultiplePlaylists(List<String> playlistIds) async {
@@ -257,11 +310,10 @@ Future<void> removeSongFromFavorites(String songId) async {
 
     try {
       await _playlistRepo.deleteMultiplePlaylists(playlistIds);
-      
+
       playlists.removeWhere((playlist) => playlistIds.contains(playlist.id));
 
-      playlists.refresh();  
-      
+      playlists.refresh();
     } catch (e) {
       rethrow;
     }
@@ -276,12 +328,10 @@ Future<void> removeSongFromFavorites(String songId) async {
       playlists.removeWhere((p) => p.id == playlist.id);
       playlists.refresh();
 
-
       TLoaders.successSnackBar(
         title: 'Success',
         message: 'Playlist deleted successfully',
       );
-
     } catch (e) {
       TLoaders.errorSnackBar(
         title: 'Error',
@@ -294,7 +344,7 @@ Future<void> removeSongFromFavorites(String songId) async {
   Future<void> removeSelectedSongs(
     List<String> songIds, {
     bool usualCall = true,
-    bool fromFavorites = false
+    bool fromFavorites = false,
   }) async {
     try {
       final playlist = selectedPlaylist.value!; // Guaranteed to exist
@@ -305,7 +355,8 @@ Future<void> removeSongFromFavorites(String songId) async {
       await _playlistRepo.updatePlaylist(updated);
 
       // Update state
-      if(!fromFavorites) playlists[playlists.indexWhere((p) => p.id == playlist.id)] = updated;
+      if (!fromFavorites)
+        playlists[playlists.indexWhere((p) => p.id == playlist.id)] = updated;
       selectedPlaylist.value = updated;
       fetchSongsOfSelectedPlaylist();
 
@@ -333,9 +384,10 @@ Future<void> removeSongFromFavorites(String songId) async {
     try {
       final updatedPlaylist = selectedPlaylist.value!.copyWith(
         name: newName ?? selectedPlaylist.value!.name,
-        coverImagePath: newCoverImagePath ?? selectedPlaylist.value!.coverImagePath,
+        coverImagePath:
+            newCoverImagePath ?? selectedPlaylist.value!.coverImagePath,
         updatedAt: DateTime.now(),
-        isCoverManuallySet: true
+        isCoverManuallySet: true,
       );
 
       await _playlistRepo.updatePlaylist(updatedPlaylist);
@@ -345,7 +397,7 @@ Future<void> removeSongFromFavorites(String songId) async {
       selectedPlaylist.value = updatedPlaylist;
       playlists.refresh();
     } catch (e) {
-        throw "Failed to update playlist";
+      throw "Failed to update playlist";
     }
   }
 
@@ -359,12 +411,16 @@ Future<void> removeSongFromFavorites(String songId) async {
     });
   }
 
-  void updatePlaylist(PlaylistModel playlist, String? firstSongImage ,{bool navigate = false}) {
+  void updatePlaylist(
+    PlaylistModel playlist,
+    String? firstSongImage, {
+    bool navigate = false,
+  }) {
     selectedPlaylist.value = playlist;
-    if(!playlist.isCoverManuallySet) selectedPlaylist.value!.coverImagePath = firstSongImage;
+    if (!playlist.isCoverManuallySet)
+      selectedPlaylist.value!.coverImagePath = firstSongImage;
     shouldNavigateToPlaylist.value = navigate;
   }
-
 
   /// UI
   void showCreatePlaylistDialog() {
@@ -432,7 +488,7 @@ Future<void> removeSongFromFavorites(String songId) async {
                         textNotEmpty.value
                             ? FontWeight.bold
                             : FontWeight.normal,
-                            fontSize: 14
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -451,7 +507,6 @@ Future<void> removeSongFromFavorites(String songId) async {
 
     final selectionController = Get.put(SelectionController<SongModel>());
 
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -464,47 +519,47 @@ Future<void> removeSongFromFavorites(String songId) async {
             color: backgroundColor,
             borderRadius: BorderRadius.circular(16),
           ),
-            child: Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Only show "Add Songs" if not a predef_recently_played or predef_most_played playlist
               if (selectedPlaylist.value?.id != 'predef_recently_played' &&
-                selectedPlaylist.value?.id != 'predef_most_played')
-              _buildCompactOption(
-                context,
-                icon: Icons.add,
-                title: 'Add Songs',
-                color: textColor,
-                onTap: () {
-                _handleAddSongs(selectionController, context);
-                },
-                radius: 12,
-              ),
+                  selectedPlaylist.value?.id != 'predef_most_played')
+                _buildCompactOption(
+                  context,
+                  icon: Icons.add,
+                  title: 'Add Songs',
+                  color: textColor,
+                  onTap: () {
+                    _handleAddSongs(selectionController, context);
+                  },
+                  radius: 12,
+                ),
 
               // Manage playlist option (always shown)
               _buildCompactOption(
-              context,
-              icon: Icons.playlist_add_check,
-              title: 'Manage Playlist',
-              color: textColor,
-              onTap: () => Navigator.pop(context),
-              radius: 0,
+                context,
+                icon: Icons.playlist_add_check,
+                title: 'Manage Playlist',
+                color: textColor,
+                onTap: () => Navigator.pop(context),
+                radius: 0,
               ),
 
               // Only show "Delete Playlist" if not a predef playlist
               if (selectedPlaylist.value?.id != 'predef_favorites' &&
-                selectedPlaylist.value?.id != 'predef_recently_played' &&
-                selectedPlaylist.value?.id != 'predef_most_played')
-              _buildCompactOption(
-                context,
-                icon: Icons.delete_outline,
-                title: 'Delete Playlist',
-                color: Colors.redAccent,
-                onTap: () {
-                _handleDeletePlaylist(selectionController, context);
-                },
-                radius: 12,
-              ),
+                  selectedPlaylist.value?.id != 'predef_recently_played' &&
+                  selectedPlaylist.value?.id != 'predef_most_played')
+                _buildCompactOption(
+                  context,
+                  icon: Icons.delete_outline,
+                  title: 'Delete Playlist',
+                  color: Colors.redAccent,
+                  onTap: () {
+                    _handleDeletePlaylist(selectionController, context);
+                  },
+                  radius: 12,
+                ),
             ],
           ),
         );
@@ -565,8 +620,8 @@ Future<void> removeSongFromFavorites(String songId) async {
         context: context,
         onTap: () {
           selectionController.addSelectedToPlaylist(selectedPlaylist.value!.id);
-          Navigator.pop(context); 
-          Navigator.pop(context); 
+          Navigator.pop(context);
+          Navigator.pop(context);
         },
         color: Colors.blue,
         text: "Add",
@@ -614,13 +669,12 @@ Future<void> removeSongFromFavorites(String songId) async {
               // Playlist cover image or fallback
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: 
-                   Container(
-                        height: 50,
-                        width: 50,
-                        color: Colors.grey[400],
-                        child: Icon(Icons.music_note, color: Colors.white, size: 30),
-                      ),
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  color: Colors.grey[400],
+                  child: Icon(Icons.music_note, color: Colors.white, size: 30),
+                ),
               ),
               const SizedBox(width: 10),
               Text(
@@ -631,7 +685,9 @@ Future<void> removeSongFromFavorites(String songId) async {
           ),
           content: Text(
             'Are you sure you want to delete this playlist?',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w400),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w400),
           ),
           actions: [
             TextButton(

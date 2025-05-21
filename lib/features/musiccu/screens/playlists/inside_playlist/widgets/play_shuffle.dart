@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:musiccu/common/widgets/container/container_text.dart';
-import 'package:musiccu/utils/constants/colors.dart';
 
 class PlayShuffle extends StatelessWidget {
   const PlayShuffle({
     super.key,
+
   });
 
   @override
@@ -19,9 +19,12 @@ class PlayShuffle extends StatelessWidget {
               text: "Play",
               icon: Icon(
                 Icons.play_arrow_rounded,
-                size: 30,
+                size: 28,
                 color: Colors.blueAccent,
               ),
+              onTap: () {
+                
+              },
             ),
           ),
         ),
@@ -33,9 +36,12 @@ class PlayShuffle extends StatelessWidget {
               text: "Shuffle",
               icon: Icon(
                 Icons.shuffle,
-                size: 30,
+                size: 28,
                 color: Colors.blue,
               ),
+              onTap: () {
+                // Shuffle action
+              },
             ),
           ),
         ),

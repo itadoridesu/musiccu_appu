@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:musiccu/data/repositories/playlists_repository.dart';
 import 'package:musiccu/data/repositories/songs_repository.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/popups/loader.dart';
@@ -224,39 +225,68 @@ class PredefinedPlaylistsController extends GetxController {
           ..remove(songId)
           ..insert(0, songId);
 
-    if (newSongIds.length > 50) {
-      newSongIds.removeRange(50, newSongIds.length);
+    if (newSongIds.length > 15) {
+      newSongIds.removeRange(15, newSongIds.length);
     }
 
     final updated = recentlyPlayed.value.copyWith(songIds: newSongIds);
     await _playlistRepo.updatePlaylist(updated);
     recentlyPlayed.value = updated;
-  }
-
-  // logic for most played
-  Future<void> incrementPlayCount(SongModel? song) async {
-    if (song == null) return;
-    // Directly use the passed song object
-    final updatedSong = song.copyWith(playCount: song.playCount + 1);
-
-    // Single repository call
-    await SongRepository.instance.updateSong(updatedSong);
-
-    // Add to Most Played if not present
-    if (!mostPlayed.value.songIds.contains(song.id)) {
-      mostPlayed.value = mostPlayed.value.copyWith(
-        songIds: [...mostPlayed.value.songIds, song.id],
-      );
-      await _playlistRepo.updatePlaylist(mostPlayed.value);
-    }
 
     if (Get.isRegistered<PlaylistController>()) {
       final playlistController = PlaylistController.instance;
 
       // THEN check if viewing favorites
-      if (playlistController.selectedPlaylist.value?.id == mostPlayedId) {
-        playlistController.fetchSongsOfSelectedPlaylist();
+      if (playlistController.selectedPlaylist.value?.id == recentlyPlayedId) {
+      playlistController.handleRecentlyPlayedUpdate(songId); // Call our dedicated function
       }
     }
   }
+
+ Future<void> incrementPlayCount(SongModel? song) async {
+  try {
+    if (song == null) return;
+    // 1. Update play count in database
+    final updatedSong = song.copyWith(playCount: song.playCount + 1);
+    await SongRepository.instance.updateSong(updatedSong);
+
+    // 2. Refresh Most Played playlist
+    await _updateMostPlayedPlaylist();
+
+  } catch (e) {
+    TLoaders.errorSnackBar(title: 'Error', message: 'Failed to update play count');
+  }
+}
+
+Future<void> _updateMostPlayedPlaylist() async {
+  // 1. Get all songs from controller (already in memory)
+  final allSongs = SongController.instance.songs;
+  
+  // 2. Sort by play count (descending)
+  final sortedSongs = List<SongModel>.from(allSongs)
+    ..sort((a, b) => b.playCount.compareTo(a.playCount));
+
+  // 3. Take top 20 IDs
+  final top20SongIds = sortedSongs.take(20).map((s) => s.id).toList();
+
+  // 4. Update if changed
+  if (!_listsEqual(top20SongIds, mostPlayed.value.songIds)) {
+    final updated = mostPlayed.value.copyWith(songIds: top20SongIds);
+    await _playlistRepo.updatePlaylist(updated);
+    mostPlayed.value = updated;
+    
+    // 5. Force UI refresh if viewing Most Played
+    if (PlaylistController.instance.selectedPlaylist.value?.id == mostPlayedId) {
+      PlaylistController.instance.playlistSongs.refresh();
+    }
+  }
+}
+
+bool _listsEqual(List<String> a, List<String> b) {
+  if (a.length != b.length) return false;
+  for (int i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
 }

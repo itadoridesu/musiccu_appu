@@ -12,63 +12,59 @@ class PlaylistAttributes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final playlistController = PlaylistController.instance;
-    return Obx(() {
-      final playlist = playlistController.selectedPlaylist.value!;
+    final playlist = playlistController.selectedPlaylist.value!;
 
-      final image = playlistController.getFirstTwoSongs(playlist)[0].imagePath;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Obx(
+          ()=> RoundedImage(
+            imageUrl: playlistController.selectedPlaylist.value!.coverImagePath ?? "",
+            height: 250,
+            width: 250,
+          ),
+        ),
+        const SizedBox(height: 10),
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-        RoundedImage(
-              imageUrl: image,
-              height: 250,
-              width: 250,
-            ),
-          const SizedBox(height: 10),
-
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 250,
-            ), // Match image width
-            child: IntrinsicWidth(
-              child: Row(
-                mainAxisSize: MainAxisSize.min, // Take only needed space
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      playlist.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      overflow: TextOverflow.ellipsis, // Handle overflow
-                      maxLines: 1, // Single line
-                    ),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 250), // Match image width
+          child: IntrinsicWidth(
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // Take only needed space
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    playlist.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    overflow: TextOverflow.ellipsis, // Handle overflow
+                    maxLines: 1, // Single line
                   ),
-                  if (playlist.id != 'predef_recently_played' &&
-                      playlist.id != 'predef_most_played') ...[
-                    IconButton(
-                      icon: const Icon(
-                        Icons.edit_sharp,
-                        size: 20,
-                        color: AColors.artistTextColor,
-                      ),
-                      onPressed: () {
-                        Get.to(UpdatePlaylistScreen(playlist: playlist));
-                      },
+                ),
+                if (playlist.id != 'predef_recently_played' &&
+                    playlist.id != 'predef_most_played') ...[
+                  IconButton(
+                    icon: const Icon(
+                      Icons.edit_sharp,
+                      size: 20,
+                      color: AColors.artistTextColor,
                     ),
-                  ],
+                    onPressed: () {
+                      Get.to(UpdatePlaylistScreen(playlist: playlist));
+                    },
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
-          Text(
-            "${playlist.songIds.length} songs",
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium!.copyWith(color: Colors.grey),
-          ),
-        ],
-      );
-    });
+        ),
+        Text(
+          "${playlist.songIds.length} songs",
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: Colors.grey),
+        ),
+      ],
+    );
   }
 }
