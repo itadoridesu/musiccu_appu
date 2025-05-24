@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:musiccu/data/repositories/playlists_repository.dart';
 import 'package:musiccu/data/repositories/songs_repository.dart';
@@ -6,6 +8,7 @@ import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/playlist_model/playlist_model.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 import 'package:musiccu/utils/popups/loader.dart';
+import 'package:collection/collection.dart'; // For ListEquality
 
 class PredefinedPlaylistsController extends GetxController {
   static PredefinedPlaylistsController get instance => Get.find();
@@ -238,55 +241,92 @@ class PredefinedPlaylistsController extends GetxController {
 
       // THEN check if viewing favorites
       if (playlistController.selectedPlaylist.value?.id == recentlyPlayedId) {
-      playlistController.handleRecentlyPlayedUpdate(songId); // Call our dedicated function
+        playlistController.handleRecentlyPlayedUpdate(
+          songId,
+        ); // Call our dedicated function
       }
     }
   }
 
- Future<void> incrementPlayCount(SongModel? song) async {
-  try {
+  Future<void> incrementPlayCount(SongModel? song) async {
     if (song == null) return;
-    // 1. Update play count in database
-    final updatedSong = song.copyWith(playCount: song.playCount + 1);
-    await SongRepository.instance.updateSong(updatedSong);
+    try {
+      // IMMEDIATE local update first
+      final updatedSong = song.copyWith(playCount: song.playCount + 1);
 
-    // 2. Refresh Most Played playlist
-    await _updateMostPlayedPlaylist();
+      // Update in controller's memory
+      SongController
+          .instance
+          .songs
+          .firstWhere((s) => s.id == song.id)
+          .playCount = updatedSong.playCount;
 
-  } catch (e) {
-    TLoaders.errorSnackBar(title: 'Error', message: 'Failed to update play count');
-  }
-}
+      unawaited(SongRepository.instance.updateSong(updatedSong));
 
-Future<void> _updateMostPlayedPlaylist() async {
-  // 1. Get all songs from controller (already in memory)
-  final allSongs = SongController.instance.songs;
-  
-  // 2. Sort by play count (descending)
-  final sortedSongs = List<SongModel>.from(allSongs)
-    ..sort((a, b) => b.playCount.compareTo(a.playCount));
+      await refreshMostPlayedPlaylist();
 
-  // 3. Take top 20 IDs
-  final top20SongIds = sortedSongs.take(20).map((s) => s.id).toList();
+      // Update database (fire and forget)
 
-  // 4. Update if changed
-  if (!_listsEqual(top20SongIds, mostPlayed.value.songIds)) {
-    final updated = mostPlayed.value.copyWith(songIds: top20SongIds);
-    await _playlistRepo.updatePlaylist(updated);
-    mostPlayed.value = updated;
-    
-    // 5. Force UI refresh if viewing Most Played
-    if (PlaylistController.instance.selectedPlaylist.value?.id == mostPlayedId) {
-      PlaylistController.instance.playlistSongs.refresh();
+      // Force refresh both playlists
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Play Count Error', message: e.toString());
     }
   }
-}
 
-bool _listsEqual(List<String> a, List<String> b) {
-  if (a.length != b.length) return false;
-  for (int i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
+  Future<void> refreshMostPlayedPlaylist() async {
+    try {
+      // Get all songs with at least 1 play
+      final songsWithPlays =
+          SongController.instance.songs
+              .where((song) => song.playCount > 0)
+              .toList();
+
+      // Sort primarily by play count, secondarily by current position
+      songsWithPlays.sort((a, b) {
+        final countCompare = b.playCount.compareTo(a.playCount);
+        if (countCompare != 0) return countCompare;
+
+        // For songs with equal play count, check their current position
+        final currentIds = mostPlayed.value.songIds;
+        final aIndex = currentIds.indexOf(a.id);
+        final bIndex = currentIds.indexOf(b.id);
+
+        // Songs not in current list get lower priority
+        if (aIndex == -1) return 1;
+        if (bIndex == -1) return -1;
+
+        // Higher index means more recently added
+        return bIndex.compareTo(aIndex);
+      });
+
+      // Take top 20
+      final topSongIds = songsWithPlays.take(20).map((s) => s.id).toList();
+
+      // Check if the list has actually changed
+      final equality = const ListEquality<String>();
+      if (!equality.equals(mostPlayed.value.songIds, topSongIds)) {
+        final updatedPlaylist = mostPlayed.value.copyWith(
+          songIds: topSongIds,
+          coverImagePath:
+              songsWithPlays.isNotEmpty ? songsWithPlays.first.imagePath : '',
+        );
+
+        await _playlistRepo.updatePlaylist(updatedPlaylist);
+        mostPlayed.value = updatedPlaylist;
+
+        // Update UI if viewing this playlist
+        if (Get.isRegistered<PlaylistController>()) {
+          final pc = PlaylistController.instance;
+          if (pc.selectedPlaylist.value?.id == mostPlayedId) {
+            pc.fetchSongsOfSelectedPlaylist();
+          }
+        }
+      }
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to refresh most played: ${e.toString()}',
+      );
+    }
   }
-  return true;
-}
 }

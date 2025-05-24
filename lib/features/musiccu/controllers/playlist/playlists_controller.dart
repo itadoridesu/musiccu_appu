@@ -95,15 +95,26 @@ class PlaylistController extends GetxController {
   }
 
 
-  // mpst played 
-  void handleMostPlayedUpdate(String songId) {
-  final songs = SongController.instance.songs;
-  final song = songs.firstWhereOrNull((s) => s.id == songId);
-  if (song != null) {
-    playlistSongs.value = [
-      ...songs.where((s) => PredefinedPlaylistsController.instance.mostPlayed.value.songIds.contains(s.id))
-    ];
-  }
+void handleMostPlayedUpdate(List<String> newSongOrder) {
+  final predefinedController = PredefinedPlaylistsController.instance;
+
+  // 1. Update our local song list
+  playlistSongs.value = newSongOrder
+      .map((id) => songs.firstWhere((s) => s.id == id))
+      .toList();
+
+  // 2. Update the playlist model
+  final updatedPlaylist = predefinedController.mostPlayed.value.copyWith(
+    songIds: newSongOrder,
+    coverImagePath: (playlistSongs.value!=null && playlistSongs.value!.isNotEmpty)
+        ? playlistSongs.value?.first.imagePath
+        : '',
+  );
+
+  // 3. Update all reactive values
+  playlistSongs.refresh(); // Add this after setting the value
+  selectedPlaylist.value = updatedPlaylist;
+  predefinedController.mostPlayed.value = updatedPlaylist;
 }
 
 
@@ -116,11 +127,6 @@ class PlaylistController extends GetxController {
     final matchedSongs = playlist.songIds
         .map((id) => songs.firstWhere((song) => song.id == id))
         .toList();
-
-    // If this is the "Most Played" playlist, sort by play count descending
-    if (playlist.id == "predef_most_played") {
-      matchedSongs.sort((a, b) => b.playCount.compareTo(a.playCount));
-    }
 
     playlistSongs.value = matchedSongs;
     playlistSongs.refresh();
@@ -646,7 +652,6 @@ class PlaylistController extends GetxController {
     );
   }
 
-  void _handleManagePlaylist() {}
 
   void _handleDeletePlaylist(
     SelectionController<SongModel> selectionController,

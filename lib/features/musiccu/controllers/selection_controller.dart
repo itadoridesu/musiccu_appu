@@ -155,6 +155,9 @@ class SelectionController<T> extends GetxController {
       selectedIds.toList(),
     );
 
+    PredefinedPlaylistsController.instance.refreshMostPlayedPlaylist();
+  
+
     clearSelection();
     restoreDefaultView();
   }

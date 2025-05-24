@@ -45,8 +45,8 @@ class InsidePlaylist extends StatelessWidget {
 
               return Column(
                 children: [
-                   PlaylistAttributes(),
-            const SizedBox(height: 15),
+                  PlaylistAttributes(),
+                  const SizedBox(height: 15),
                   if (songs != null && songs.isNotEmpty) PlayShuffle(),
                   const SizedBox(height: 7),
 
@@ -175,13 +175,13 @@ class InsidePlaylist extends StatelessWidget {
 
                               // for recently and most played
 
-                              PredefinedPlaylistsController.instance
-                                  .incrementPlayCount(song);
+                              if (SongController.instance.selectedSong.value !=
+                                  song)
+                                PredefinedPlaylistsController.instance
+                                    .incrementPlayCount(song);
 
                               PredefinedPlaylistsController.instance
                                   .addToRecentlyPlayed(song.id);
-
-                               
                             },
                           ),
                         ),

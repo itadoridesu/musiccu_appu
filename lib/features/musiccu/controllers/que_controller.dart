@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
+import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
@@ -17,7 +18,8 @@ class QueueController extends GetxController {
 
   final songController = SongController.instance;
 
-  late final predefinedPlaylistsController = PredefinedPlaylistsController.instance;
+  late final predefinedPlaylistsController =
+      PredefinedPlaylistsController.instance;
 
   // Add this to your QueueController class
 
@@ -149,8 +151,8 @@ class QueueController extends GetxController {
         // Restart current song immediately
         await audio.audioPlayer.seek(Duration.zero);
         await audio.audioPlayer.play();
-        predefinedPlaylistsController.incrementPlayCount(currentSong);
-
+        await predefinedPlaylistsController.incrementPlayCount(currentSong);
+        PlaylistController.instance.fetchSongsOfSelectedPlaylist();
         break;
 
       case RepeatMode.all:
@@ -159,9 +161,10 @@ class QueueController extends GetxController {
         songController.selectedSong.value = currentSong;
 
         // for most and recently played
-        predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
-        predefinedPlaylistsController.incrementPlayCount(currentSong);
-
+        await Future.wait([
+          predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id),
+          predefinedPlaylistsController.incrementPlayCount(currentSong),
+        ]);
 
         break;
 
@@ -172,8 +175,10 @@ class QueueController extends GetxController {
           songController.selectedSong.value = currentSong;
 
           // for most and recently played
-          predefinedPlaylistsController.incrementPlayCount(currentSong);
-          predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id);
+          await Future.wait([
+            predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id),
+            predefinedPlaylistsController.incrementPlayCount(currentSong),
+          ]);
         } else {
           // Stop at queue end
           await audio.audioPlayer.stop();
@@ -235,9 +240,15 @@ class QueueController extends GetxController {
   }
 
   /// Jumps to specific index in queue
-  void jumpToIndex(int index) {
+  void jumpToIndex(int index) async {
     if (index >= 0 && index < queue.length) {
       currentIndex.value = index;
+      if (songController.selectedSong.value != currentSong) {
+        await Future.wait([
+          predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id),
+          predefinedPlaylistsController.incrementPlayCount(currentSong),
+        ]);
+      }
       songController.selectedSong.value = currentSong; // Sync audio
     }
   }

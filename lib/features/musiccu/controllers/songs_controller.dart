@@ -182,7 +182,7 @@ class SongController extends GetxController {
     SongModel song, {
     bool navigate = false,
     BuildContext? context,
-  }) {
+  }) async{
     // Same song - just open NowPlaying
     if (selectedSong.value?.id == song.id) {
       Get.to(
@@ -195,8 +195,8 @@ class SongController extends GetxController {
     // New song selected
     selectedSong.value = song;
 
-    _predefinedPlaylistsController.addToRecentlyPlayed(song.id);
-    _predefinedPlaylistsController.incrementPlayCount(song);
+    await _predefinedPlaylistsController.addToRecentlyPlayed(song.id);
+    await _predefinedPlaylistsController.incrementPlayCount(song);
 
 
     if (context != null) {
@@ -396,6 +396,7 @@ class SongController extends GetxController {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close confirmation
+                PredefinedPlaylistsController.instance.refreshMostPlayedPlaylist();
                 deleteSong(song); // Perform delete
                 PredefinedPlaylistsController.instance
                     .removeFromPredefinedPlaylists([song.id]);

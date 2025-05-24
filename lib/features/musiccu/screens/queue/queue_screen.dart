@@ -124,8 +124,6 @@ class QueueScreen extends StatelessWidget {
                           ).textTheme.titleLarge!.copyWith(fontSize: 15),
                           onTap: () {
                             queueController.jumpToIndex(index);
-                            PredefinedPlaylistsController.instance.addToRecentlyPlayed(queue[index].id);
-
                           },
                         ),
                       );
