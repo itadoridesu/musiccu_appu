@@ -62,18 +62,18 @@ class SongtileSimple extends StatelessWidget {
                 children: [
                   !movingText? Text(
                     song.songName,
-                    style: songNameStyle ?? Theme.of(context).textTheme.headlineMedium,
+                    style: songNameStyle ?? Theme.of(context).textTheme.headlineMedium!.copyWith(fontSize: 20),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ) : MovingText(text: song.songName, width: 200),
                   SizedBox(height: heightBtwText,),
                   !isMostPlayed ? Text(
                     song.artistName,
-                    style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge,
+                    style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 15),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ) : Text("played " + song.playCount.toString() + " times",
-                    style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge,
+                    style: artistNameStyle ?? Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 15),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

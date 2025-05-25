@@ -24,14 +24,15 @@ class ContainerText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultColor = THelperFunctions.isDarkMode(context)
-        ? AColors.darkGray2
-        : AColors.pageTitleColor;
+    final defaultColor =
+        THelperFunctions.isDarkMode(context)
+            ? AColors.darkGray2
+            : AColors.pageTitleColor;
 
     return Material(
-       color: Colors.transparent,
-        borderRadius: BorderRadius.circular(22),
-        clipBehavior: Clip.antiAlias, // required for ripple to clip to radius
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -49,10 +50,11 @@ class ContainerText extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 text,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium!
-                    .copyWith(fontWeight: FontWeight.bold, color: Colors.blueAccent, fontSize: 20),
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                  fontSize: 20,
+                ),
               ),
             ],
           ),

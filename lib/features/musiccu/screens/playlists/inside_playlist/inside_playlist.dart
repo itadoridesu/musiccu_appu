@@ -47,7 +47,7 @@ class InsidePlaylist extends StatelessWidget {
                 children: [
                   PlaylistAttributes(),
                   const SizedBox(height: 15),
-                  if (songs != null && songs.isNotEmpty) PlayShuffle(),
+                  if (songs != null && songs.isNotEmpty) PlayShuffle(songs: songs,),
                   const SizedBox(height: 7),
 
                   ListView.builder(

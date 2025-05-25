@@ -41,7 +41,7 @@ class SongArtistText extends StatelessWidget {
               song.songName,
               overflow: isEllipsis ? TextOverflow.ellipsis : TextOverflow.visible,
               style: Theme.of(context).textTheme.headlineMedium!
-            .copyWith(fontWeight: FontWeight.bold),
+            .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
               ),
@@ -53,7 +53,7 @@ class SongArtistText extends StatelessWidget {
             child: Text(
               song.artistName,
               overflow: isEllipsis ? TextOverflow.ellipsis : TextOverflow.visible,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 15)
             ),
           ),
         ),

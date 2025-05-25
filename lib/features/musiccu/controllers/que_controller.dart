@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
 import 'package:musiccu/features/musiccu/controllers/playlist/playlists_controller.dart';
@@ -153,10 +154,7 @@ class QueueController extends GetxController {
         await audio.audioPlayer.play();
         await predefinedPlaylistsController.incrementPlayCount(currentSong);
         if (Get.isRegistered<PlaylistController>()) {
-          final playlistController = PlaylistController.instance;
-          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
-            playlistController.playlistSongs.refresh();
-          }
+          PlaylistController.instance.playlistSongs.refresh();
         }
         break;
 
@@ -164,12 +162,8 @@ class QueueController extends GetxController {
         // Move to next song (with wrap-around)
         currentIndex.value = (currentIndex.value + 1) % queue.length;
         songController.selectedSong.value = currentSong;
-
-         if (Get.isRegistered<PlaylistController>()) {
-          final playlistController = PlaylistController.instance;
-          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
-            playlistController.playlistSongs.refresh();
-          }
+        if (Get.isRegistered<PlaylistController>()) {
+          PlaylistController.instance.playlistSongs.refresh();
         }
 
         // for most and recently played
@@ -178,11 +172,8 @@ class QueueController extends GetxController {
           predefinedPlaylistsController.incrementPlayCount(currentSong),
         ]);
 
-         if (Get.isRegistered<PlaylistController>()) {
-          final playlistController = PlaylistController.instance;
-          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
-            playlistController.playlistSongs.refresh();
-          }
+        if (Get.isRegistered<PlaylistController>()) {
+          PlaylistController.instance.playlistSongs.refresh();
         }
 
         break;
@@ -285,6 +276,27 @@ class QueueController extends GetxController {
 
     // Note: In shuffled state, new songs remain at end
     // User must explicitly shuffle again to mix them
+  }
+
+  // playlist play and shuffle
+  /// Plays the playlist starting from the first song
+  void playPlaylist(List<SongModel> songs, BuildContext context) {
+    if (songs.isEmpty) return;
+
+    setQueue(songs, startingIndex: 0);
+    SongController.instance.updateSelectedSong(currentSong!, navigate: true, context: context);
+  }
+
+  /// Shuffles and plays a random song from the playlist
+  void shufflePlaylist(List<SongModel> songs, BuildContext context) {
+    if (songs.isEmpty) return;
+
+    // Create a copy to avoid modifying the original list
+    final shuffledSongs = List<SongModel>.from(songs)..shuffle();
+
+    setQueue(shuffledSongs, startingIndex: 0);
+    isShuffled.value = true;
+    SongController.instance.updateSelectedSong(currentSong!, navigate: true, context: context);
   }
 
   /// Removes song by ID from both queues

@@ -71,8 +71,9 @@ class SongTile extends StatelessWidget {
               () => SelectionScreen<SongModel>(
                 items: SongController.instance.songs,
                 getId: (song) => song.id,
-                buildTile: (song) => SongtileSimple(song: song),
+                buildTile: (song) => SongtileSimple(song: song, heigt: 80, width: 80),
                 selectionController: selectionController,
+                distance: 8,
                 actions: [
                   SelectionAction(
                     icon: Icons.playlist_add,
@@ -130,8 +131,8 @@ class SongTile extends StatelessWidget {
                     tag: 'image_${song.id}_${showIcon ? 'show' : 'hide'}',
                     child: RoundedImage(
                       imageUrl: song.imagePath,
-                      height: 85,
-                      width: 85,
+                      height: 80,
+                      width: 80,
                       applyImageRadius: true,
                     ),
                   ),
@@ -143,6 +144,7 @@ class SongTile extends StatelessWidget {
                     song: song,
                     showIcon: showIcon,
                     isEllipsis: true,
+                    maxWidth: 0.42,
                   ),
                 ],
               ),

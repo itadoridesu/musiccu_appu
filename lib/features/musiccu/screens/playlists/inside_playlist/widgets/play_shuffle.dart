@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:musiccu/common/widgets/container/container_text.dart';
+import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
+import 'package:musiccu/features/musiccu/models/song_model/song_model.dart';
 
 class PlayShuffle extends StatelessWidget {
   const PlayShuffle({
-    super.key,
-
+    super.key, required this.songs,
   });
+
+  final List<SongModel> songs;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +17,7 @@ class PlayShuffle extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: 25),
             child: ContainerText(
               text: "Play",
               icon: Icon(
@@ -22,16 +25,14 @@ class PlayShuffle extends StatelessWidget {
                 size: 28,
                 color: Colors.blueAccent,
               ),
-              onTap: () {
-                
-              },
+              onTap: () => QueueController.instance.playPlaylist(songs, context),
             ),
           ),
         ),
         const SizedBox(width: 7),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: 25),
             child: ContainerText(
               text: "Shuffle",
               icon: Icon(
@@ -39,9 +40,7 @@ class PlayShuffle extends StatelessWidget {
                 size: 28,
                 color: Colors.blue,
               ),
-              onTap: () {
-                // Shuffle action
-              },
+              onTap: () => QueueController.instance.shufflePlaylist(songs, context),
             ),
           ),
         ),
