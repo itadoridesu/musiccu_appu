@@ -152,7 +152,12 @@ class QueueController extends GetxController {
         await audio.audioPlayer.seek(Duration.zero);
         await audio.audioPlayer.play();
         await predefinedPlaylistsController.incrementPlayCount(currentSong);
-        PlaylistController.instance.fetchSongsOfSelectedPlaylist();
+        if (Get.isRegistered<PlaylistController>()) {
+          final playlistController = PlaylistController.instance;
+          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
+            playlistController.playlistSongs.refresh();
+          }
+        }
         break;
 
       case RepeatMode.all:
@@ -160,11 +165,25 @@ class QueueController extends GetxController {
         currentIndex.value = (currentIndex.value + 1) % queue.length;
         songController.selectedSong.value = currentSong;
 
+         if (Get.isRegistered<PlaylistController>()) {
+          final playlistController = PlaylistController.instance;
+          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
+            playlistController.playlistSongs.refresh();
+          }
+        }
+
         // for most and recently played
         await Future.wait([
           predefinedPlaylistsController.addToRecentlyPlayed(currentSong!.id),
           predefinedPlaylistsController.incrementPlayCount(currentSong),
         ]);
+
+         if (Get.isRegistered<PlaylistController>()) {
+          final playlistController = PlaylistController.instance;
+          if (playlistController.selectedPlaylist.value?.id == "predef_most_played") {
+            playlistController.playlistSongs.refresh();
+          }
+        }
 
         break;
 
