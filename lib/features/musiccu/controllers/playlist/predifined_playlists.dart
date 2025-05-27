@@ -318,7 +318,7 @@ class PredefinedPlaylistsController extends GetxController {
         if (Get.isRegistered<PlaylistController>()) {
           final pc = PlaylistController.instance;
           if (pc.selectedPlaylist.value?.id == mostPlayedId) {
-            pc.fetchSongsOfSelectedPlaylist();
+            pc.handleMostPlayedUpdate(topSongIds);
           }
         }
       }

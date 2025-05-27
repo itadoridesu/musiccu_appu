@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:reorderables/reorderables.dart';
 import 'package:musiccu/common/widgets/appbar/app_bar.dart';
 import 'package:musiccu/common/widgets/icons/container_icon.dart';
 import 'package:musiccu/common/widgets/tiles/songtile_simple.dart';
 import 'package:musiccu/features/musiccu/controllers/audio/audio_controller.dart';
-import 'package:musiccu/features/musiccu/controllers/playlist/predifined_playlists.dart';
 import 'package:musiccu/features/musiccu/controllers/songs_controller.dart';
 import 'package:musiccu/features/musiccu/screens/now_playing/now_playing.dart';
 import 'package:musiccu/features/musiccu/controllers/que_controller.dart';
@@ -23,14 +24,11 @@ class QueueScreen extends StatelessWidget {
     final isDarkMode = THelperFunctions.isDarkMode(context);
 
     return PopScope(
-      canPop: false, // Disables the default back navigation
+      canPop: false,
       onPopInvoked: (didPop) async {
-        if (didPop) return; // Already handled
-
+        if (didPop) return;
         Get.off(
-          () => NowPlayingNoLyrics(
-            showIcon: false,
-          ),
+          () => NowPlayingNoLyrics(showIcon: false),
           duration: Duration(milliseconds: 600),
         );
       },
@@ -44,7 +42,10 @@ class QueueScreen extends StatelessWidget {
           leadingWidget: IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: () {
-              Get.off(() => NowPlayingNoLyrics(showIcon: false), duration: Duration(milliseconds: 600));
+              Get.off(
+                () => NowPlayingNoLyrics(showIcon: false),
+                duration: Duration(milliseconds: 600),
+              );
             },
           ),
         ),
@@ -62,7 +63,7 @@ class QueueScreen extends StatelessWidget {
 
           return Column(
             children: [
-              // This is the sticky header part
+              // Sticky header part
               Padding(
                 padding: const EdgeInsets.only(left: 14, right: 14, bottom: 12),
                 child: Row(
@@ -81,9 +82,7 @@ class QueueScreen extends StatelessWidget {
                         showHero: true,
                         onTap: () {
                           Get.off(
-                            () => NowPlayingNoLyrics(
-                              showIcon: false,
-                            ),
+                            () => NowPlayingNoLyrics(showIcon: false),
                             duration: const Duration(milliseconds: 600),
                           );
                         },
@@ -102,35 +101,82 @@ class QueueScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              // This is the scrollable list part
+              // Scrollable list with reordering
               Expanded(
-                child: SingleChildScrollView(
+                child: ReorderableColumn(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (_, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: SongtileSimple(
-                          song: queue[index],
-                          heigt: 65,
-                          width: 65,
-                          songNameStyle: Theme.of(
-                            context,
-                          ).textTheme.headlineMedium!.copyWith(fontSize: 18),
-                          artistNameStyle: Theme.of(
-                            context,
-                          ).textTheme.titleLarge!.copyWith(fontSize: 15),
-                          onTap: () {
-                            queueController.jumpToIndex(index);
-                          },
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, index) => const SizedBox(height: 10),
-                    itemCount: queue.length,
-                  ),
+                  onReorder: (oldIndex, newIndex) {
+                    queueController.reorderQueue(oldIndex, newIndex);
+                  },
+                  
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  buildDraggableFeedback: (context, constraints, child) {
+                    return Material(
+                      elevation: 7,
+                      color: Colors.transparent,
+                      child: ConstrainedBox(
+                        constraints: constraints,
+                        child: child,
+                      ),
+                    );
+                    
+                  },
+                   // Add these new properties for faster edge scrolling:
+    scrollController: ScrollController(),
+    scrollAnimationDuration: const Duration(milliseconds: 100), // Faster animation
+   
+                  children:
+                      queue.map((song) {
+                        final index = queue.indexOf(song);
+                        return Padding(
+                          key: ValueKey(song.id),
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Slidable(
+                            key: ValueKey('slidable_${song.id}'),
+                            endActionPane: ActionPane(
+                              extentRatio: 0.2,
+                              motion: const BehindMotion(),
+                              dismissible: DismissiblePane(
+                                dismissThreshold: 0.3,
+                                onDismissed:
+                                    () => queueController.removeFromQueue(
+                                      song.id,
+                                    ),
+                              ),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    queueController.removeFromQueue(song.id);
+                                  },
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    bottomRight: Radius.circular(20),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: SongtileSimple(
+                                song: song,
+                                heigt: 65,
+                                width: 65,
+                                songNameStyle: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium!
+                                    .copyWith(fontSize: 18),
+                                artistNameStyle: Theme.of(
+                                  context,
+                                ).textTheme.titleLarge!.copyWith(fontSize: 15),
+                                onTap: () => queueController.jumpToIndex(index),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
             ],

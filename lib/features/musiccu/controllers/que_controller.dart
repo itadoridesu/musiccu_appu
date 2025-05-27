@@ -284,19 +284,33 @@ class QueueController extends GetxController {
     if (songs.isEmpty) return;
 
     setQueue(songs, startingIndex: 0);
-    SongController.instance.updateSelectedSong(currentSong!, navigate: true, context: context);
+    SongController.instance.updateSelectedSong(
+      currentSong!,
+      navigate: true,
+      context: context,
+    );
   }
 
   /// Shuffles and plays a random song from the playlist
   void shufflePlaylist(List<SongModel> songs, BuildContext context) {
     if (songs.isEmpty) return;
 
-    // Create a copy to avoid modifying the original list
-    final shuffledSongs = List<SongModel>.from(songs)..shuffle();
+    // First set the queue with original order (starting at 0)
+    setQueue(songs, startingIndex: 0);
 
-    setQueue(shuffledSongs, startingIndex: 0);
+    // Then create a shuffled copy and assign it to the queue
+    final shuffledSongs = List<SongModel>.from(songs)..shuffle();
+    queue.assignAll(shuffledSongs);
+
+    // Reset current index to 0 since we're playing from start
+    currentIndex.value = 0;
+
     isShuffled.value = true;
-    SongController.instance.updateSelectedSong(currentSong!, navigate: true, context: context);
+    SongController.instance.updateSelectedSong(
+      currentSong!,
+      navigate: true,
+      context: context,
+    );
   }
 
   /// Removes song by ID from both queues
@@ -322,4 +336,31 @@ class QueueController extends GetxController {
       _originalOrder.removeAt(originalIndexToRemove);
     }
   }
+
+  // In QueueController class
+void reorderQueue(int oldIndex, int newIndex) {
+  if (oldIndex < 0 || oldIndex >= queue.length || 
+      newIndex < 0 || newIndex >= queue.length) return;
+
+  final song = queue[oldIndex];
+  queue.removeAt(oldIndex);
+  queue.insert(newIndex, song);
+
+  // Update current index if needed
+  if (currentIndex.value == oldIndex) {
+    currentIndex.value = newIndex;
+  } else if (currentIndex.value > oldIndex && currentIndex.value <= newIndex) {
+    currentIndex.value--;
+  } else if (currentIndex.value < oldIndex && currentIndex.value >= newIndex) {
+    currentIndex.value++;
+  }
+
+  // Also update original order if not shuffled
+  if (!isShuffled.value) {
+    final originalSong = _originalOrder[oldIndex];
+    _originalOrder.removeAt(oldIndex);
+    _originalOrder.insert(newIndex, originalSong);
+    _originalIndex = currentIndex.value;
+  }
+}
 }
