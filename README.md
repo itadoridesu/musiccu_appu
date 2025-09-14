@@ -128,41 +128,53 @@ lib/
     └── validators/
 ```
 
----
 
-## 📸 Demo / Screenshots
+## 📸 App Walkthrough (Screenshots)
 
-### 📃 Songs
+### 1. Songs List
+| Songs Screen |
+| :---: |
+| <img src="screenshots/songs-screen.jpg" width="200"/> |
+| *List of songs from local storage* |
 
-* Songs List <img src="screenshots/songs-screen.jpg" width="200"/>
+### 2. Now Playing
+| Playing Song | Repeat1 Mode | Lyrics |
+| :---: | :---: | :---: |
+| <img src="screenshots/song-playing.jpg" width="200"/> | <img src="screenshots/song-playing-repeat1-mode.jpg" width="200"/> | <img src="screenshots/lyrics-screen.jpg" width="200"/> |
+| *Song playback screen* | *Repeat1 mode active* | *Lyrics view* |
 
-### 🎶 Queue
+| Song Options | Song Imported |
+| :---: | :---: |
+| <img src="screenshots/song-options.jpg" width="200"/> | <img src="screenshots/song-imported.jpg" width="200"/> |
+| *Options for current song* | *Song successfully imported* |
 
-* Queue Screen <img src="screenshots/queue.jpg" width="200"/>
-* Queue Song Positioning <img src="screenshots/queue-song-positioning.jpg" width="200"/>
-* Remove Song from Queue <img src="screenshots/queue-remove-song.jpg" width="200"/>
-* Queue Shuffle On <img src="screenshots/queue-shuffl-on.jpg" width="200"/>
+### 3. Queue
+| Queue Screen | Song Positioning | Remove Song |
+| :---: | :---: | :---: |
+| <img src="screenshots/queue.jpg" width="200"/> | <img src="screenshots/queue-song-positioning.jpg" width="200"/> | <img src="screenshots/queue-remove-song.jpg" width="200"/> |
+| *Current queue view* | *Reordering songs in queue* | *Removing song from queue* |
 
-### 🎵 Playlists
+| Shuffle On |
+| :---: |
+| <img src="screenshots/queue-shuffl-on.jpg" width="200"/> |
+| *Shuffle mode enabled* |
 
-* Most Played Playlist <img src="screenshots/mostplayed-playlist.jpg" width="200"/>
-* Add Song to Playlist <img src="screenshots/add-song-to-playlist.jpg" width="200"/>
-* Delete Playlists <img src="screenshots/delete-playlists.jpg" width="200"/>
-* Many Songs to Many Playlists <img src="screenshots/many-songs-to-many-playlists.jpg" width="200"/>
-* Select Playlists Options <img src="screenshots/select-playlists-options.jpg" width="200"/>
-* Playlists Deleted Snackbar <img src="screenshots/playlists-deleted-snackbar.jpg" width="200"/>
+### 4. Playlists
+| Most Played | Add Song | Delete Playlist |
+| :---: | :---: | :---: |
+| <img src="screenshots/mostplayed-playlist.jpg" width="200"/> | <img src="screenshots/add-song-to-playlist.jpg" width="200"/> | <img src="screenshots/delete-playlists.jpg" width="200"/> |
+| *Most played playlist* | *Adding song to playlist* | *Deleting playlist* |
 
-### 🎤 Now Playing
+| Many Songs → Playlists | Select Playlist Options | Playlist Deleted Snackbar |
+| :---: | :---: | :---: |
+| <img src="screenshots/many-songs-to-many-playlists.jpg" width="200"/> | <img src="screenshots/select-playlists-options.jpg" width="200"/> | <img src="screenshots/playlists-deleted-snackbar.jpg" width="200"/> |
+| *Add multiple songs to multiple playlists* | *Playlist options menu* | *Feedback after deletion* |
 
-* Song Playing <img src="screenshots/song-playing.jpg" width="200"/>
-* Song Playing Repeat1 Mode <img src="screenshots/song-playing-repeat1-mode.jpg" width="200"/>
-* Lyrics Screen <img src="screenshots/lyrics-screen.jpg" width="200"/>
-* Song Options <img src="screenshots/song-options.jpg" width="200"/>
-* Song Imported <img src="screenshots/song-imported.jpg" width="200"/>
-
-### ⚙️ Settings
-
-* Settings Screen <img src="screenshots/settings.jpg" width="200"/>
+### 5. Settings
+| Settings Screen |
+| :---: |
+| <img src="screenshots/settings.jpg" width="200"/> |
+| *App settings and preferences* |
 
 ---
 
