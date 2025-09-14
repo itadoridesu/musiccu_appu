@@ -45,33 +45,23 @@ git clone https://github.com/itadoridesu/musiccu_appu.git
 
 2. Navigate to the project directory:
 
-```
+```bash
 cd musiccu_appu
 ```
 
 3. Install dependencies:
 
-```
+```bash
 flutter pub get
 ```
 
 4. Run the app:
 
-```
+```bash
 flutter run
 ```
 
 > Make sure you have Flutter installed and your device/emulator ready.
-
----
-
-## 🎨 Usage
-
-* Navigate through your songs and playlists
-* Tap a song to play or add to queue
-* Use the queue screen to reorder, skip, or remove songs
-* Long press or use playlist options to add/remove multiple songs
-* Enjoy dark/light mode toggle and smooth UI animations
 
 ---
 
@@ -82,24 +72,15 @@ Feature-First Structure
 ```
 lib/
 ├── bindings/               # Dependency injections and bindings (GetX)
-├── common/                 # Shared widgets and styles
-│   ├── styles/             # Global styling (colors, text styles, themes)
-│   └── widgets/            # Reusable UI components
-│       ├── appbar/
-│       ├── container/
-│       ├── glassmorphism/
-│       ├── icons/
-│       ├── images/
-│       ├── music/
-│       ├── select/
-│       ├── texts/
-│       └── tiles/
+├── common/                 # Shared widgets & styles
+│   ├── styles/
+│   └── widgets/
 ├── data/                   # Data layer
-│   ├── dummy_data/         # Sample or mock data
-│   ├── repositories/       # Abstracted data sources
-│   └── services/           # APIs or local services
+│   ├── dummy_data/
+│   ├── repositories/
+│   └── services/
 ├── features/               # Feature modules
-│   ├── authentication/     # User login & registration
+│   ├── authentication/     # Login & Sign-up
 │   │   ├── controllers/
 │   │   ├── models/
 │   │   └── screens/
@@ -151,54 +132,37 @@ lib/
 
 ## 📸 Demo / Screenshots
 
-### 📃 Songs List
+### 📃 Songs
 
-* Songs Screen  
-  ![Songs Screen](screenshots/songs-screen.jpg)
-
-### 🎤 Now Playing / Song
-
-* Song Playing  
-  ![Song Playing](screenshots/song-playing.jpg)
-* Song Playing Repeat1 Mode  
-  ![Song Playing Repeat1 Mode](screenshots/song-playing-repeat1-mode.jpg)
-* Lyrics Screen  
-  ![Lyrics Screen](screenshots/lyrics-screen.jpg)
-* Song Options  
-  ![Song Options](screenshots/song-options.jpg)
-* Song Imported  
-  ![Song Imported](screenshots/song-imported.jpg)
+* Songs List <img src="screenshots/songs-screen.jpg" width="200"/>
 
 ### 🎶 Queue
 
-* Queue Screen  
-  ![Queue](screenshots/queue.jpg)
-* Queue Song Positioning  
-  ![Queue Song Positioning](screenshots/queue-song-positioning.jpg)
-* Remove Song from Queue  
-  ![Queue Remove Song](screenshots/queue-remove-song.jpg)
-* Queue Shuffle On  
-  ![Queue Shuffle On](screenshots/queue-shuffl-on.jpg)
+* Queue Screen <img src="screenshots/queue.jpg" width="200"/>
+* Queue Song Positioning <img src="screenshots/queue-song-positioning.jpg" width="200"/>
+* Remove Song from Queue <img src="screenshots/queue-remove-song.jpg" width="200"/>
+* Queue Shuffle On <img src="screenshots/queue-shuffl-on.jpg" width="200"/>
 
 ### 🎵 Playlists
 
-* Playlists Deleted Snackbar  
-  ![Playlists Deleted Snackbar](screenshots/playlists-deleted-snackbar.jpg)
-* Delete Playlists  
-  ![Delete Playlists](screenshots/delete-playlists.jpg)
-* Add Song to Playlist  
-  ![Add Song to Playlist](screenshots/add-song-to-playlist.jpg)
-* Many Songs to Many Playlists  
-  ![Many Songs to Many Playlists](screenshots/many-songs-to-many-playlists.jpg)
-* Select Playlists Options  
-  ![Select Playlists Options](screenshots/select-playlists-options.jpg)
-* Most Played Playlist  
-  ![Most Played Playlist](screenshots/mostplayed-playlist.jpg)
+* Most Played Playlist <img src="screenshots/mostplayed-playlist.jpg" width="200"/>
+* Add Song to Playlist <img src="screenshots/add-song-to-playlist.jpg" width="200"/>
+* Delete Playlists <img src="screenshots/delete-playlists.jpg" width="200"/>
+* Many Songs to Many Playlists <img src="screenshots/many-songs-to-many-playlists.jpg" width="200"/>
+* Select Playlists Options <img src="screenshots/select-playlists-options.jpg" width="200"/>
+* Playlists Deleted Snackbar <img src="screenshots/playlists-deleted-snackbar.jpg" width="200"/>
+
+### 🎤 Now Playing
+
+* Song Playing <img src="screenshots/song-playing.jpg" width="200"/>
+* Song Playing Repeat1 Mode <img src="screenshots/song-playing-repeat1-mode.jpg" width="200"/>
+* Lyrics Screen <img src="screenshots/lyrics-screen.jpg" width="200"/>
+* Song Options <img src="screenshots/song-options.jpg" width="200"/>
+* Song Imported <img src="screenshots/song-imported.jpg" width="200"/>
 
 ### ⚙️ Settings
 
-* Settings Screen  
-  ![Settings](screenshots/settings.jpg)
+* Settings Screen <img src="screenshots/settings.jpg" width="200"/>
 
 ---
 
@@ -208,4 +172,4 @@ Adem Hamizi
 Email: [adem.hamizi@lau.edu](mailto:adem.hamizi@lau.edu)
 Phone: +213 796550612
 
-**itadoridesu** – [GitHub Profile](https://github.com/itadoridesu)
+GitHub: [itadoridesu](https://github.com/itadoridesu)
