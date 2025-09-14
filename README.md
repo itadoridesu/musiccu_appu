@@ -151,54 +151,54 @@ lib/
 
 ## 📸 Demo / Screenshots
 
-### 🎵 Playlists
+### 📃 Songs List
 
-* Add Song to Playlist
-  ![Add Song to Playlist](screenshots/add-song-to-playlist.jpg)
-* Delete Playlists
-  ![Delete Playlists](screenshots/delete-playlists.jpg)
-* Most Played Playlist
-  ![Most Played Playlist](screenshots/mostplayed-playlist.jpg)
-* Select Playlists Options
-  ![Select Playlists Options](screenshots/select-playlists-options.jpg)
-* Many Songs to Many Playlists
-  ![Many Songs to Many Playlists](screenshots/many-songs-to-many-playlists.jpg)
-* Playlists Deleted Snackbar
-  ![Playlists Deleted Snackbar](screenshots/playlists-deleted-snackbar.jpg)
-
-### 🎶 Queue
-
-* Queue Screen
-  ![Queue](screenshots/queue.jpg)
-* Queue Song Positioning
-  ![Queue Song Positioning](screenshots/queue-song-positioning.jpg)
-* Remove Song from Queue
-  ![Queue Remove Song](screenshots/queue-remove-song.jpg)
-* Queue Shuffle On
-  ![Queue Shuffle On](screenshots/queue-shuffl-on.jpg)
+* Songs Screen  
+  ![Songs Screen](screenshots/songs-screen.jpg)
 
 ### 🎤 Now Playing / Song
 
-* Song Playing
+* Song Playing  
   ![Song Playing](screenshots/song-playing.jpg)
-* Song Playing Repeat1 Mode
+* Song Playing Repeat1 Mode  
   ![Song Playing Repeat1 Mode](screenshots/song-playing-repeat1-mode.jpg)
-* Lyrics Screen
+* Lyrics Screen  
   ![Lyrics Screen](screenshots/lyrics-screen.jpg)
-* Song Options
+* Song Options  
   ![Song Options](screenshots/song-options.jpg)
-* Song Imported
+* Song Imported  
   ![Song Imported](screenshots/song-imported.jpg)
+
+### 🎶 Queue
+
+* Queue Screen  
+  ![Queue](screenshots/queue.jpg)
+* Queue Song Positioning  
+  ![Queue Song Positioning](screenshots/queue-song-positioning.jpg)
+* Remove Song from Queue  
+  ![Queue Remove Song](screenshots/queue-remove-song.jpg)
+* Queue Shuffle On  
+  ![Queue Shuffle On](screenshots/queue-shuffl-on.jpg)
+
+### 🎵 Playlists
+
+* Playlists Deleted Snackbar  
+  ![Playlists Deleted Snackbar](screenshots/playlists-deleted-snackbar.jpg)
+* Delete Playlists  
+  ![Delete Playlists](screenshots/delete-playlists.jpg)
+* Add Song to Playlist  
+  ![Add Song to Playlist](screenshots/add-song-to-playlist.jpg)
+* Many Songs to Many Playlists  
+  ![Many Songs to Many Playlists](screenshots/many-songs-to-many-playlists.jpg)
+* Select Playlists Options  
+  ![Select Playlists Options](screenshots/select-playlists-options.jpg)
+* Most Played Playlist  
+  ![Most Played Playlist](screenshots/mostplayed-playlist.jpg)
 
 ### ⚙️ Settings
 
-* Settings Screen
+* Settings Screen  
   ![Settings](screenshots/settings.jpg)
-
-### 📃 Songs List
-
-* Songs Screen
-  ![Songs Screen](screenshots/songs-screen.jpg)
 
 ---
 
